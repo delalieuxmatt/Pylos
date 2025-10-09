@@ -3,25 +3,22 @@ package be.kuleuven.pylos.player.student;
 import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class StudentPlayer extends PylosPlayer {
-    private PylosLocation remove1 = null;
-    private PylosLocation remove2 = null;
     private PylosGameSimulator simulator;
     private PylosBoard board;
     private double bestMinimax;
     private PylosSphere bestSphere;
     private PylosLocation bestLocation;
-    private int branchDepth = 0;
+    private int branchDepth;
     private HashMap<Long, Double> minimaxResults;
 
-    private final double WIN_THIS = 2000;
-    private final double WIN_OTHER = -2000;
-    private final double INITIAL_THIS = -9999;
-    private final double INITIAL_OTHER = 9999;
-    private int MAX_BRANCH_DEPTH = 4;
+    private static final double WIN_THIS = 2000;
+    private static final double WIN_OTHER = -2000;
+    private static final double INITIAL_THIS = -9999;
+    private static final double INITIAL_OTHER = 9999;
+    private static final int MAX_BRANCH_DEPTH = 4;
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
@@ -31,34 +28,26 @@ public class StudentPlayer extends PylosPlayer {
         PylosSphere[] mySpheres = board.getSpheres(this);
         PylosLocation[] locations = board.getLocations();
 
-        // Try to move a sphere to higher level
+        // Try moving existing spheres to higher levels
         if (myReserveSphere != null) {
             for (PylosSphere sphere : mySpheres) {
                 if (!sphere.isReserve()) {
                     for (PylosLocation location : locations) {
                         if (sphere.canMoveTo(location)) {
-                            PylosLocation prevLocation = sphere.getLocation();
-                            simulator.moveSphere(sphere, location);
-                            double minimax = branchStep(bestMinimax, bestMinimax);
-                            eval(minimax, sphere, location);
-                            simulator.undoMoveSphere(sphere, prevLocation, PylosGameState.MOVE, this.PLAYER_COLOR);
+                            tryMove(sphere, location);
                         }
                     }
                 }
             }
         }
 
-        // Try to add a reserve sphere
+        // Try adding reserve sphere
         for (PylosLocation location : locations) {
             if (location.isUsable()) {
-                simulator.moveSphere(myReserveSphere, location);
-                double minimax = branchStep(bestMinimax, bestMinimax);
-                eval(minimax, myReserveSphere, location);
-                simulator.undoAddSphere(myReserveSphere, PylosGameState.MOVE, this.PLAYER_COLOR);
+                tryAddReserve(myReserveSphere, location);
             }
         }
 
-        // Execute the best move
         game.moveSphere(bestSphere, bestLocation);
     }
 
@@ -68,15 +57,10 @@ public class StudentPlayer extends PylosPlayer {
 
         for (PylosSphere sphere : board.getSpheres(PLAYER_COLOR)) {
             if (sphere.canRemove()) {
-                PylosLocation prevLocation = sphere.getLocation();
-                simulator.removeSphere(sphere);
-                double minimax = branchStep(bestMinimax, bestMinimax);
-                eval(minimax, sphere, null);
-                simulator.undoRemoveFirstSphere(sphere, prevLocation, PylosGameState.REMOVE_FIRST, this.PLAYER_COLOR);
+                tryRemove(sphere, PylosGameState.REMOVE_FIRST);
             }
         }
 
-        // Execute the best move
         game.removeSphere(bestSphere);
     }
 
@@ -86,21 +70,15 @@ public class StudentPlayer extends PylosPlayer {
 
         for (PylosSphere sphere : board.getSpheres(PLAYER_COLOR)) {
             if (sphere.canRemove()) {
-                PylosLocation prevLocation = sphere.getLocation();
-                simulator.removeSphere(sphere);
-                double minimax = branchStep(bestMinimax, bestMinimax);
-                eval(minimax, sphere, null);
-                simulator.undoRemoveSecondSphere(sphere, prevLocation, PylosGameState.REMOVE_SECOND, this.PLAYER_COLOR);
+                tryRemove(sphere, PylosGameState.REMOVE_SECOND);
             }
         }
 
         // Try passing
         simulator.pass();
-        double chance = branchStep(bestMinimax, bestMinimax);
-        eval(chance, null, null);
-        simulator.undoPass(PylosGameState.REMOVE_SECOND, this.PLAYER_COLOR);
+        eval(branchStep(bestMinimax, bestMinimax), null, null);
+        simulator.undoPass(PylosGameState.REMOVE_SECOND, PLAYER_COLOR);
 
-        // Execute the best move
         if (bestSphere != null) {
             game.removeSphere(bestSphere);
         } else {
@@ -126,21 +104,48 @@ public class StudentPlayer extends PylosPlayer {
         }
     }
 
-    /**
-     * Main branching method that delegates to specific game state handlers
-     */
+    // Helper methods to reduce code duplication
+    private void tryMove(PylosSphere sphere, PylosLocation location) {
+        PylosLocation prevLocation = sphere.getLocation();
+        simulator.moveSphere(sphere, location);
+        eval(branchStep(bestMinimax, bestMinimax), sphere, location);
+        simulator.undoMoveSphere(sphere, prevLocation, PylosGameState.MOVE, PLAYER_COLOR);
+    }
+
+    private void tryAddReserve(PylosSphere sphere, PylosLocation location) {
+        simulator.moveSphere(sphere, location);
+        eval(branchStep(bestMinimax, bestMinimax), sphere, location);
+        simulator.undoAddSphere(sphere, PylosGameState.MOVE, PLAYER_COLOR);
+    }
+
+    private void tryRemove(PylosSphere sphere, PylosGameState state) {
+        PylosLocation prevLocation = sphere.getLocation();
+        simulator.removeSphere(sphere);
+        eval(branchStep(bestMinimax, bestMinimax), sphere, null);
+
+        if (state == PylosGameState.REMOVE_FIRST) {
+            simulator.undoRemoveFirstSphere(sphere, prevLocation, state, PLAYER_COLOR);
+        } else {
+            simulator.undoRemoveSecondSphere(sphere, prevLocation, state, PLAYER_COLOR);
+        }
+    }
+
     private double branchStep(double siblingMinimax, double parentSiblingMinimax) {
-        // Base case: max depth reached
         if (branchDepth == MAX_BRANCH_DEPTH) {
-            return evaluatePosition(board);
+            return evaluatePosition();
         }
 
-        final PylosPlayerColor color = simulator.getColor();
-        final PylosGameState state = simulator.getState();
+        PylosPlayerColor color = simulator.getColor();
+        PylosGameState state = simulator.getState();
+
+        // Check cache
+        long hash = computeBoardHash(color, state);
+        Double cached = minimaxResults.get(hash);
+        if (cached != null) return cached;
 
         branchDepth++;
-
         double result;
+
         switch (state) {
             case MOVE:
                 result = branchDoMove(siblingMinimax);
@@ -152,12 +157,8 @@ public class StudentPlayer extends PylosPlayer {
                 result = branchDoRemoveOrPass(parentSiblingMinimax);
                 break;
             case COMPLETED:
-                result = simulator.getWinner() == PLAYER_COLOR ? WIN_THIS : WIN_OTHER;
-                if (simulator.getWinner() == PLAYER_COLOR) {
-                    result -= branchDepth;
-                } else {
-                    result += branchDepth;
-                }
+                result = (simulator.getWinner() == PLAYER_COLOR ? WIN_THIS : WIN_OTHER);
+                result += (simulator.getWinner() == PLAYER_COLOR ? -branchDepth : branchDepth);
                 break;
             case DRAW:
                 result = simulator.getWinner() == PLAYER_COLOR ? WIN_OTHER : WIN_THIS;
@@ -167,311 +168,225 @@ public class StudentPlayer extends PylosPlayer {
         }
 
         branchDepth--;
+        minimaxResults.put(hash, result);
         return result;
     }
 
-    /**
-     * Handles the MOVE state - tries all possible moves
-     */
     private double branchDoMove(double siblingMinimax) {
-        final PylosPlayerColor currentColor = simulator.getColor();
-        double minimax = currentColor == PLAYER_COLOR ? INITIAL_THIS : INITIAL_OTHER;
+        PylosPlayerColor color = simulator.getColor();
+        boolean isMaximizing = (color == PLAYER_COLOR);
+        double minimax = isMaximizing ? INITIAL_THIS : INITIAL_OTHER;
 
-        PylosSphere myReserveSphere = board.getReserve(currentColor);
-        PylosSphere[] mySpheres = board.getSpheres(currentColor);
+        PylosSphere reserve = board.getReserve(color);
+        PylosSphere[] spheres = board.getSpheres(color);
         PylosLocation[] locations = board.getLocations();
 
-        // Try to move a sphere to higher level
-        if (myReserveSphere != null) {
-            for (PylosSphere sphere : mySpheres) {
+        // Try moving spheres to higher levels
+        if (reserve != null) {
+            for (PylosSphere sphere : spheres) {
                 if (!sphere.isReserve()) {
-                    for (PylosLocation location : locations) {
-                        if (sphere.canMoveTo(location)) {
-                            PylosLocation prevLocation = sphere.getLocation();
-                            simulator.moveSphere(sphere, location);
+                    for (PylosLocation loc : locations) {
+                        if (sphere.canMoveTo(loc)) {
+                            PylosLocation prev = sphere.getLocation();
+                            simulator.moveSphere(sphere, loc);
                             double result = branchStep(minimax, siblingMinimax);
-
-                            if (currentColor == PLAYER_COLOR) {
-                                if (result > minimax) minimax = result;
-                            } else {
-                                if (result < minimax) minimax = result;
-                            }
-
-                            simulator.undoMoveSphere(sphere, prevLocation, PylosGameState.MOVE, currentColor);
+                            minimax = updateMinimax(minimax, result, isMaximizing);
+                            simulator.undoMoveSphere(sphere, prev, PylosGameState.MOVE, color);
                         }
                     }
                 }
             }
         }
 
-        // Try to add a reserve sphere
-        for (PylosLocation location : locations) {
-            if (location.isUsable()) {
-                simulator.moveSphere(myReserveSphere, location);
+        // Try adding reserve sphere
+        for (PylosLocation loc : locations) {
+            if (loc.isUsable()) {
+                simulator.moveSphere(reserve, loc);
                 double result = branchStep(minimax, siblingMinimax);
-
-                if (currentColor == PLAYER_COLOR) {
-                    if (result > minimax) minimax = result;
-                } else {
-                    if (result < minimax) minimax = result;
-                }
-
-                simulator.undoAddSphere(myReserveSphere, PylosGameState.MOVE, currentColor);
+                minimax = updateMinimax(minimax, result, isMaximizing);
+                simulator.undoAddSphere(reserve, PylosGameState.MOVE, color);
             }
         }
 
         return minimax;
     }
 
-    /**
-     * Handles the REMOVE_FIRST state - must remove a sphere after completing a square
-     */
     private double branchDoRemove(double parentSiblingMinimax) {
-        final PylosPlayerColor currentColor = simulator.getColor();
-        double minimax = currentColor == PLAYER_COLOR ? INITIAL_THIS : INITIAL_OTHER;
+        PylosPlayerColor color = simulator.getColor();
+        boolean isMaximizing = (color == PLAYER_COLOR);
+        double minimax = isMaximizing ? INITIAL_THIS : INITIAL_OTHER;
 
-        PylosSphere[] mySpheres = board.getSpheres(currentColor);
-
-        // Remove a sphere
-        for (PylosSphere sphere : mySpheres) {
+        for (PylosSphere sphere : board.getSpheres(color)) {
             if (sphere.canRemove()) {
-                PylosLocation prevLocation = sphere.getLocation();
+                PylosLocation prev = sphere.getLocation();
                 simulator.removeSphere(sphere);
                 double result = branchStep(parentSiblingMinimax, parentSiblingMinimax);
-
-                if (currentColor == PLAYER_COLOR) {
-                    if (result > minimax) minimax = result;
-                } else {
-                    if (result < minimax) minimax = result;
-                }
-
-                simulator.undoRemoveFirstSphere(sphere, prevLocation, PylosGameState.REMOVE_FIRST, currentColor);
+                minimax = updateMinimax(minimax, result, isMaximizing);
+                simulator.undoRemoveFirstSphere(sphere, prev, PylosGameState.REMOVE_FIRST, color);
             }
         }
 
         return minimax;
     }
 
-    /**
-     * Handles the REMOVE_SECOND state - can remove a second sphere or pass
-     */
     private double branchDoRemoveOrPass(double parentSiblingMinimax) {
-        final PylosPlayerColor currentColor = simulator.getColor();
-        double minimax = currentColor == PLAYER_COLOR ? INITIAL_THIS : INITIAL_OTHER;
+        PylosPlayerColor color = simulator.getColor();
+        boolean isMaximizing = (color == PLAYER_COLOR);
+        double minimax = isMaximizing ? INITIAL_THIS : INITIAL_OTHER;
 
-        PylosSphere[] mySpheres = board.getSpheres(currentColor);
-
-        // Remove a sphere
-        for (PylosSphere sphere : mySpheres) {
+        for (PylosSphere sphere : board.getSpheres(color)) {
             if (sphere.canRemove()) {
-                PylosLocation prevLocation = sphere.getLocation();
+                PylosLocation prev = sphere.getLocation();
                 simulator.removeSphere(sphere);
                 double result = branchStep(minimax, minimax);
-
-                if (currentColor == PLAYER_COLOR) {
-                    if (result > minimax) minimax = result;
-                } else {
-                    if (result < minimax) minimax = result;
-                }
-
-                simulator.undoRemoveSecondSphere(sphere, prevLocation, PylosGameState.REMOVE_SECOND, currentColor);
+                minimax = updateMinimax(minimax, result, isMaximizing);
+                simulator.undoRemoveSecondSphere(sphere, prev, PylosGameState.REMOVE_SECOND, color);
             }
         }
 
-        // Pass
+        // Pass option
         simulator.pass();
-        double result = evaluatePosition(board);
-
-        if (currentColor == PLAYER_COLOR) {
-            if (result > minimax) minimax = result;
-        } else {
-            if (result < minimax) minimax = result;
-        }
-
-        simulator.undoPass(PylosGameState.REMOVE_SECOND, currentColor);
+        double result = evaluatePosition();
+        minimax = updateMinimax(minimax, result, isMaximizing);
+        simulator.undoPass(PylosGameState.REMOVE_SECOND, color);
 
         return minimax;
     }
 
-    /**
-     * Enhanced evaluation function considering multiple strategic factors
-     */
-    private double evaluatePosition(PylosBoard board) {
-        double score = 0;
+    // Consolidate minimax update logic
+    private double updateMinimax(double current, double candidate, boolean isMaximizing) {
+        return isMaximizing ? Math.max(current, candidate) : Math.min(current, candidate);
+    }
 
-        // 1. RESERVE DIFFERENCE (most important - running out of reserves loses the game)
+    private long computeBoardHash(PylosPlayerColor currentColor, PylosGameState state) {
+        long hash = 0;
+        PylosLocation[] locations = board.getLocations();
+
+        for (int i = 0; i < locations.length; i++) {
+            PylosLocation loc = locations[i];
+            if (loc.getSphere() != null) {
+                int colorValue = loc.getSphere().PLAYER_COLOR == PLAYER_COLOR ? 1 : 2;
+                hash = hash * 31 + colorValue * (i + 1);
+            }
+        }
+
+        hash = hash * 31 + board.getReservesSize(PLAYER_COLOR);
+        hash = hash * 31 + board.getReservesSize(PLAYER_COLOR.other());
+        hash = hash * 31 + (currentColor == PLAYER_COLOR ? 1 : 2);
+        hash = hash * 31 + state.ordinal();
+
+        return hash;
+    }
+
+    private double evaluatePosition() {
         int myReserves = board.getReservesSize(PLAYER_COLOR);
         int oppReserves = board.getReservesSize(PLAYER_COLOR.other());
-        score += (myReserves - oppReserves) * 100;  // Weight: 100
 
-        // 2. HEIGHT ADVANTAGE (spheres on higher levels are more valuable)
-        score += evaluateHeightAdvantage(board) * 50;  // Weight: 50
-
-        // 3. SQUARE POTENTIAL (ability to form squares for sphere removal)
-        score += evaluateSquarePotential(board) * 30;  // Weight: 30
-
-        // 4. MOBILITY (number of available moves)
-        score += evaluateMobility(board) * 10;  // Weight: 10
+        double score = (myReserves - oppReserves) * 100;
+        score += evaluateHeightAdvantage() * 50;
+        score += evaluateSquarePotential() * 30;
+        score += evaluateMobility() * 10;
 
         return score;
     }
 
-    /**
-     * Evaluates advantage based on sphere heights
-     * Higher level spheres are more valuable as they're closer to winning
-     */
-    private double evaluateHeightAdvantage(PylosBoard board) {
-        double heightScore = 0;
-        PylosSphere[] mySpheres = board.getSpheres(PLAYER_COLOR);
-        PylosSphere[] oppSpheres = board.getSpheres(PLAYER_COLOR.other());
+    private double evaluateHeightAdvantage() {
+        int[] myCounts = new int[4];
+        int[] oppCounts = new int[4];
 
-        // Count spheres at each level with increasing weights
-        int[] myHeightCounts = new int[4];
-        int[] oppHeightCounts = new int[4];
+        countHeights(board.getSpheres(PLAYER_COLOR), myCounts);
+        countHeights(board.getSpheres(PLAYER_COLOR.other()), oppCounts);
 
-        for (PylosSphere sphere : mySpheres) {
-            if (!sphere.isReserve()) {
-                PylosLocation loc = sphere.getLocation();
-                if (loc != null) {
-                    myHeightCounts[loc.Z]++;
-                }
-            }
-        }
-
-        for (PylosSphere sphere : oppSpheres) {
-            if (!sphere.isReserve()) {
-                PylosLocation loc = sphere.getLocation();
-                if (loc != null) {
-                    oppHeightCounts[loc.Z]++;
-                }
-            }
-        }
-
-        // Weight spheres by height: level 0=1, level 1=2, level 2=4, level 3=8
+        double score = 0;
         for (int level = 0; level < 4; level++) {
-            int weight = (int) Math.pow(2, level);
-            heightScore += (myHeightCounts[level] - oppHeightCounts[level]) * weight;
+            int weight = 1 << level; // 2^level
+            score += (myCounts[level] - oppCounts[level]) * weight;
         }
 
-        return heightScore;
+        return score;
     }
 
-    /**
-     * Evaluates potential to form squares (for removing spheres)
-     */
-    private double evaluateSquarePotential(PylosBoard board) {
-        double squareScore = 0;
+    private void countHeights(PylosSphere[] spheres, int[] counts) {
+        for (PylosSphere sphere : spheres) {
+            if (!sphere.isReserve()) {
+                PylosLocation loc = sphere.getLocation();
+                if (loc != null) {
+                    counts[loc.Z]++;
+                }
+            }
+        }
+    }
 
-        // Check all possible square positions on each level
-        for (int level = 0; level < 3; level++) {  // Levels 0-2 can have squares
-            int boardSize = 4 - level;
+    private double evaluateSquarePotential() {
+        double score = 0;
 
-            for (int x = 0; x < boardSize - 1; x++) {
-                for (int y = 0; y < boardSize - 1; y++) {
-                    // Check 2x2 square starting at (x, y, level)
-                    squareScore += evaluateSingleSquare(board, x, y, level);
+        for (int level = 0; level < 3; level++) {
+            int size = 4 - level;
+            for (int x = 0; x < size - 1; x++) {
+                for (int y = 0; y < size - 1; y++) {
+                    score += evaluateSingleSquare(x, y, level);
                 }
             }
         }
 
-        return squareScore;
+        return score;
     }
 
-    /**
-     * Evaluates a single 2x2 square position
-     */
-    private double evaluateSingleSquare(PylosBoard board, int x, int y, int level) {
-        int myCount = 0;
-        int oppCount = 0;
-        int emptyCount = 0;
-
-        // Check all 4 positions of the square
+    private double evaluateSingleSquare(int x, int y, int level) {
+        int myCount = 0, oppCount = 0, emptyCount = 0;
         int[][] offsets = {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
 
         for (int[] offset : offsets) {
             PylosLocation loc = board.getBoardLocation(x + offset[0], y + offset[1], level);
+            PylosSphere sphere = loc.getSphere();
 
-            if (loc.getSphere() == null) {
+            if (sphere == null) {
                 emptyCount++;
-            } else if (loc.getSphere().PLAYER_COLOR == PLAYER_COLOR) {
+            } else if (sphere.PLAYER_COLOR == PLAYER_COLOR) {
                 myCount++;
             } else {
                 oppCount++;
             }
         }
 
-        // Score potential squares
-        if (oppCount == 0) {  // Only my spheres or empty
-            if (myCount == 3 && emptyCount == 1) {
-                return 5.0;  // One move away from completing square!
-            } else if (myCount == 2 && emptyCount == 2) {
-                return 2.0;  // Partial square potential
-            }
-        } else if (myCount == 0) {  // Only opponent spheres or empty
-            if (oppCount == 3 && emptyCount == 1) {
-                return -5.0;  // Opponent one move away!
-            } else if (oppCount == 2 && emptyCount == 2) {
-                return -2.0;  // Opponent has partial square
-            }
-        }
+        // Only evaluate unmixed squares
+        if (oppCount == 0 && myCount == 3) return 5.0;
+        if (oppCount == 0 && myCount == 2) return 2.0;
+        if (myCount == 0 && oppCount == 3) return -5.0;
+        if (myCount == 0 && oppCount == 2) return -2.0;
 
-        return 0.0;  // Mixed square - no potential
+        return 0.0;
     }
 
-    /**
-     * Evaluates mobility (number of available moves)
-     * More options = better position
-     */
-    private double evaluateMobility(PylosBoard board) {
-        int myMoves = countAvailableMoves(board, PLAYER_COLOR);
-        int oppMoves = countAvailableMoves(board, PLAYER_COLOR.other());
-
-        return myMoves - oppMoves;
+    private double evaluateMobility() {
+        return countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other());
     }
 
-    /**
-     * Counts available moves for a player
-     */
-    /**
-     * Counts available moves for a player
-     */
-    /**
-     * Counts available moves for a player
-     */
-    private int countAvailableMoves(PylosBoard board, PylosPlayerColor color) {
-        int moveCount = 0;
+    private int countAvailableMoves(PylosPlayerColor color) {
+        int count = 0;
         PylosSphere[] spheres = board.getSpheres(color);
         PylosLocation[] locations = board.getLocations();
 
-        // 1. Count moves to higher levels
+        // Count moves to higher levels
         for (PylosSphere sphere : spheres) {
             if (!sphere.isReserve()) {
                 for (PylosLocation loc : locations) {
                     if (sphere.canMoveTo(loc)) {
-                        moveCount++;
+                        count++;
                     }
                 }
             }
         }
 
-        // 2. Count reserve placement moves
-        // *** NEW FIX: Check the reserve size (which is guaranteed not to crash) ***
-        int reserveSize = board.getReservesSize(color);
-
-        if (reserveSize > 0) { // Only proceed if a reserve sphere actually exists
-            // Since we know one exists, we can calculate the moves
-            // (We no longer need to call PylosSphere reserve = board.getReserve(color);
-            // which was causing the crash)
-
+        // Count reserve placements
+        if (board.getReservesSize(color) > 0) {
             for (PylosLocation loc : locations) {
                 if (loc.isUsable()) {
-                    moveCount++;
+                    count++;
                 }
             }
         }
 
-        return moveCount;
+        return count;
     }
-
-
 }
