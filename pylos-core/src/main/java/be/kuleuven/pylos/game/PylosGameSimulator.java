@@ -6,7 +6,6 @@ package be.kuleuven.pylos.game;
 public class PylosGameSimulator {
 
     private final PylosBoard board;
-
     private PylosGameState currentState;
     private PylosPlayerColor currentColor;
     private PylosPlayerColor winner = null;

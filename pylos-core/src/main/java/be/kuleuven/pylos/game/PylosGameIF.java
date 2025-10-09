@@ -88,5 +88,4 @@ public interface PylosGameIF {
      */
     boolean passIsDraw();
 
-
 }

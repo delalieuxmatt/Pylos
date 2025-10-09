@@ -37,7 +37,7 @@ public class PylosMain {
         Random random = new Random(0);
 
         PylosPlayer playerLight = new PylosPlayerBestFit();
-        PylosPlayer playerDark = new PylosPlayerMiniMax(2);
+        PylosPlayer playerDark = new PylosPlayerMiniMax(4);
 
         PylosBoard pylosBoard = new PylosBoard();
         PylosGame pylosGame = new PylosGame(pylosBoard, playerLight, playerDark, random, PylosGameObserver.CONSOLE_GAME_OBSERVER, PylosPlayerObserver.NONE);
@@ -56,10 +56,10 @@ public class PylosMain {
             }
         };
 
-        PylosPlayerType p2 = new PylosPlayerType("Minimax3") {
+        PylosPlayerType p2 = new PylosPlayerType("Minimax4") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(3);
+                return new PylosPlayerMiniMax(4);
             }
         };
 
