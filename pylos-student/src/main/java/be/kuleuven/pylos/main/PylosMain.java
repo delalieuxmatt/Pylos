@@ -51,7 +51,7 @@ public class PylosMain {
             @Override
             public PylosPlayer create() {
 
-                return new StudentPlayerRandomFit();
+                return new StudentPlayer();
                 // return new PylosPlayerBestFit();
             }
         };
@@ -59,7 +59,7 @@ public class PylosMain {
         PylosPlayerType p2 = new PylosPlayerType("Minimax3") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(3);
+                return new PylosPlayerMiniMax(2);
             }
         };
 
