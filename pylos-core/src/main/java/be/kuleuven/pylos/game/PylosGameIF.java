@@ -2,6 +2,8 @@ package be.kuleuven.pylos.game;
 
 import be.kuleuven.pylos.player.PylosPlayer;
 
+import java.util.ArrayList;
+
 /**
  * Created by Jan on 20/02/2015.
  */
@@ -85,5 +87,6 @@ public interface PylosGameIF {
      * @return
      */
     boolean passIsDraw();
+
 
 }

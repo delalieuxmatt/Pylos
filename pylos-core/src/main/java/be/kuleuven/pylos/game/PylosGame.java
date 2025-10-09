@@ -299,4 +299,10 @@ public class PylosGame implements PylosGameIF {
         return boardHistory;
     }
 
+    public PylosBoard getBoard(){return board;}
+
+
+
+
+
 }

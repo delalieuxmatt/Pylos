@@ -569,4 +569,41 @@ public class PylosBoard {
     }
 
 
+
+    public PylosBoard getClone() {
+        // Create a new clean board with the same size
+        PylosBoard clone = new PylosBoard(this.SIZE);
+
+        // Copy the encoded board state
+        clone.state = this.state;
+
+        // Rebuild sphere placements based on bitmask
+        for (PylosLocation loc : clone.allLocations) {
+            long lightMask = BIT_MASK_FOR_OR[loc.Z][loc.X][loc.Y][PylosPlayerColor.LIGHT.ordinal()];
+            long darkMask  = BIT_MASK_FOR_OR[loc.Z][loc.X][loc.Y][PylosPlayerColor.DARK.ordinal()];
+
+            if ((this.state & lightMask) != 0) {
+                // Light sphere placed here
+                PylosSphere sphere = clone.getReserve(PylosPlayerColor.LIGHT);
+                clone.add(sphere, loc);
+            } else if ((this.state & darkMask) != 0) {
+                // Dark sphere placed here
+                PylosSphere sphere = clone.getReserve(PylosPlayerColor.DARK);
+                clone.add(sphere, loc);
+            }
+        }
+
+        return clone;
+    }
+
+    public ArrayList<PylosLocation> getAvailableLocations(){
+        PylosLocation[] allLocations = this.getLocations();
+        ArrayList<PylosLocation> availableLocations = new ArrayList<>();
+        for(int i = 0; i<allLocations.length; i++){
+            if (allLocations[i].isUsable()) {
+                availableLocations.add(allLocations[i]);
+            }
+        }
+        return availableLocations;
+    }
 }

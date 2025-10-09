@@ -1,12 +1,11 @@
 package be.kuleuven.pylos.player.student;
 
-import be.kuleuven.pylos.game.PylosBoard;
-import be.kuleuven.pylos.game.PylosGameIF;
-import be.kuleuven.pylos.game.PylosLocation;
-import be.kuleuven.pylos.game.PylosSphere;
+import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
 
 import java.util.ArrayList;
+
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
 
 /**
  * Created by Jan on 20/02/2015.
@@ -119,6 +118,51 @@ public class StudentPlayer extends PylosPlayer {
         }
 
         return true; // No spheres above, safe to remove
+    }
+
+    private boolean isGameOver(PylosBoard board){
+        return board.getNumberOfSpheresOnBoard() == 30;
+    }
+
+    private double minimax(PylosGame game, int depth, boolean isMaximizing){
+        PylosBoard board = game.getBoard();
+        if(depth == 0 || isGameOver(game.getBoard())){
+            return evaluateBoard(game.getBoard());
+        }
+        if(isMaximizing){
+            double maxEval = Double.NEGATIVE_INFINITY;
+            for(PylosLocation loc : board.getAvailableLocations()){
+            }
+        }
+        return 0;
+
+    }
+
+    private double evaluateBoard(PylosBoard board) {
+        PylosSphere[] mySpheres = board.getSpheres(this);
+        PylosSphere[] oppSpheres = board.getSpheres(this.OTHER);
+
+        double score = 0;
+
+        // Reserve difference (most important - fewer spheres used = better)
+        int myReserve = board.getReservesSize(this);
+        int oppReserve = board.getReservesSize(this.OTHER);
+        score += (myReserve - oppReserve) * 50;
+
+        // Height control
+        for (PylosSphere sphere : mySpheres) {
+            if (sphere.getLocation() != null) {
+                score += sphere.getLocation().Z * 10;
+            }
+        }
+
+        for (PylosSphere sphere : oppSpheres) {
+            if (sphere.getLocation() != null) {
+                score -= sphere.getLocation().Z * 10;
+            }
+        }
+
+        return score;
     }
 
 
