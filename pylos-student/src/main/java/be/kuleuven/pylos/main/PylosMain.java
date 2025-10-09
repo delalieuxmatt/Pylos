@@ -59,7 +59,7 @@ public class PylosMain {
         PylosPlayerType p2 = new PylosPlayerType("Minimax3") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(2);
+                return new PylosPlayerMiniMax(3);
             }
         };
 

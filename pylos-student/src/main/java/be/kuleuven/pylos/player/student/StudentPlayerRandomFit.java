@@ -43,7 +43,6 @@ public class StudentPlayerRandomFit extends PylosPlayer {
 
     @Override
     public void doRemoveOrPass(PylosGameIF game, PylosBoard board) {
-        game.pass();
-
+        game.pass();;
     }
 }

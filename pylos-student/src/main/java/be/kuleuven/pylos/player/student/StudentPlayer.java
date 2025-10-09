@@ -6,6 +6,8 @@ import be.kuleuven.pylos.game.PylosLocation;
 import be.kuleuven.pylos.game.PylosSphere;
 import be.kuleuven.pylos.player.PylosPlayer;
 
+import java.util.ArrayList;
+
 /**
  * Created by Jan on 20/02/2015.
  */
@@ -130,20 +132,24 @@ public class StudentPlayer extends PylosPlayer {
      */
 
     private double evaluate_Move(PylosGameIF game ,PylosBoard board, PylosLocation location) {
-        double weight_by_move = 0;
-        final double step_weight = 1.0;
-        final double HEIGHT_WEIGHT = 4.0; // * height
+       /* double weight_by_move = 0;
+        final double STEP_WEIGHT = 1.0;
+        final double HEIGHT_WEIGHT = 8.0; // * height
         final double SQUARE_WEIGHT = 25.0; // making a square leads to having a bigger reserve and higher chance to win
+        final double OTHER_SQUARE_WEIGHT = 22.0;
         final double RESERVE_WEIGHT = 8.0; // this does not matter in this calc , but its an indication
 
 
-        weight_by_move += HEIGHT_WEIGHT * location.Z + 1; // plus one is so that there is a feasibel solution
-        if (square_possible(board, location)) weight_by_move += RESERVE_WEIGHT;
+        weight_by_move += HEIGHT_WEIGHT * location.Z + STEP_WEIGHT; // plus one is so that there is a feasibel solution
+        if (square_possible(board, location , false)) weight_by_move += SQUARE_WEIGHT;
+        if (square_possible(board,location,true)) weight_by_move += OTHER_SQUARE_WEIGHT;
 
-        // you get an advantage by having a higher
         return weight_by_move;
+
+        */
+        return board.getReservesSize(this) - board.getReservesSize(this.OTHER);
     }
-    private boolean square_possible(PylosBoard board, PylosLocation location) {
+    private boolean square_possible(PylosBoard board, PylosLocation location , boolean isotherplayer) {
         // A location can be part of up to 4 different 2x2 squares on its level
         // Check each possible square where this location is one of the 4 corners
 
@@ -158,8 +164,9 @@ public class StudentPlayer extends PylosPlayer {
                 // Square where location is BOTTOM-RIGHT corner
                 {-1, -1, 0, -1, -1, 0, 0, 0}
         };
-
-        PylosSphere[] mySpheres = board.getSpheres(this);
+        PylosSphere[] Spheres;
+        if (isotherplayer) Spheres  = board.getSpheres(this);
+        else Spheres = board.getSpheres(this.OTHER);
         int boardSize = 4 - location.Z; // Board dimensions for this level
 
         for (int[] offsets : squareOffsets) {
@@ -184,7 +191,7 @@ public class StudentPlayer extends PylosPlayer {
 
                 // Check if any of my spheres occupies this position
                 boolean hasMySphere = false;
-                for (PylosSphere sphere : mySpheres) {
+                for (PylosSphere sphere : Spheres) {
                     PylosLocation sphereLoc = sphere.getLocation();
                     if (sphereLoc != null && !sphere.isReserve() &&
                             sphereLoc.Z == location.Z &&
