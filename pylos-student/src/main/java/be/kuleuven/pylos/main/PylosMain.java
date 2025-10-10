@@ -27,8 +27,8 @@ public class PylosMain {
         /* !!! jvm argument !!! -ea */
 
         //startSingleGame();
-        startBattle();
-        //startBattleMultithreaded();
+        //startBattle();
+        startBattleMultithreaded();
         //startRoundRobinTournament();
     }
 
@@ -46,7 +46,7 @@ public class PylosMain {
     }
 
     public static void startBattle() {
-        int nRuns = 1000;
+        int nRuns = 100;
         PylosPlayerType p1 = new PylosPlayerType("Student") {
             @Override
             public PylosPlayer create() {
@@ -71,19 +71,19 @@ public class PylosMain {
         //as this is not ideal for use across multiple threads.
         //Use Collections.shuffle(List<?> list, Random random) instead, with the Random object from the player (PylosPlayer.getRandom())
 
-        int nRuns = 1000;
+        int nRuns = 100;
         int nThreads = 8;
 
-        PylosPlayerType p1 = new PylosPlayerType("BestFit") {
+        PylosPlayerType p1 = new PylosPlayerType("ons") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerBestFit();
+                return new StudentPlayer();
             }
         };
-        PylosPlayerType p2 = new PylosPlayerType("Minimax2") {
+        PylosPlayerType p2 = new PylosPlayerType("Minimax4") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(2);
+                return new PylosPlayerMiniMax(4);
             }
         };
 
