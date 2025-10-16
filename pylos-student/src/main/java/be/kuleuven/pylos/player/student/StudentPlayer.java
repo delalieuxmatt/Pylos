@@ -2,6 +2,8 @@ package be.kuleuven.pylos.player.student;
 
 import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StudentPlayer extends PylosPlayer {
     private PylosGameSimulator simulator;
@@ -10,12 +12,13 @@ public class StudentPlayer extends PylosPlayer {
     private PylosSphere bestSphere;
     private PylosLocation bestLocation;
     private int branchDepth;
+    private final Map<Long, Double> evaluationCache = new HashMap<>();
 
     private static final double WIN_THIS = 2000;
     private static final double WIN_OTHER = -2000;
     private static final double INITIAL_THIS = -9999;
     private static final double INITIAL_OTHER = 9999;
-    private static final int MAX_BRANCH_DEPTH = 4;
+    private static final int MAX_BRANCH_DEPTH = 6;
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
@@ -110,6 +113,7 @@ public class StudentPlayer extends PylosPlayer {
         this.bestSphere = null;
         this.bestLocation = null;
         this.branchDepth = 0;
+        this.evaluationCache.clear();
     }
     ///  often used -> one function
     private void eval(double minimax, PylosSphere sphere, PylosLocation location) {
@@ -291,6 +295,12 @@ public class StudentPlayer extends PylosPlayer {
     }
 
     private double evaluatePosition() {
+        long signature = computeBoardSignature();
+        Double cachedScore = evaluationCache.get(signature);
+        if (cachedScore != null) {
+            return cachedScore;
+        }
+
         int myReserves = board.getReservesSize(PLAYER_COLOR);
         int oppReserves = board.getReservesSize(PLAYER_COLOR.other());
 
@@ -300,7 +310,26 @@ public class StudentPlayer extends PylosPlayer {
         // evaluation for mobility
         score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other()) )* 10;
 
+        evaluationCache.put(signature, score);
         return score;
+    }
+
+    private long computeBoardSignature() {
+        long hash = 17;
+        for (PylosLocation location : board.getLocations()) {
+            hash = hash * 31 + encodeLocation(location);
+        }
+        hash = hash * 31 + simulator.getState().ordinal();
+        hash = hash * 31 + simulator.getColor().ordinal();
+        return hash;
+    }
+
+    private int encodeLocation(PylosLocation location) {
+        PylosSphere sphere = location.getSphere();
+        if (sphere == null) {
+            return 0;
+        }
+        return sphere.PLAYER_COLOR == PLAYER_COLOR ? 1 : 2;
     }
 
     private double evaluateHeightAdvantage() {
