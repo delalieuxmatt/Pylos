@@ -2,8 +2,8 @@ package be.kuleuven.pylos.player.student;
 
 import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.*;
 
 public class StudentPlayer extends PylosPlayer {
     private PylosGameSimulator simulator;
@@ -26,7 +26,10 @@ public class StudentPlayer extends PylosPlayer {
         PylosSphere myReserveSphere = board.getReserve(this);
         PylosSphere[] mySpheres = board.getSpheres(this);
         PylosLocation[] locations = board.getLocations();
-
+        if (isMyFirstTurn()) {
+            if (tryHardcodedOpening(game)) return; // succesvol geplaatst, we zijn klaar
+            // als alle middenvakken bezet zijn → ga verder met normale zoeklogica
+        }
         if (myReserveSphere != null) {
             for (PylosSphere sphere : mySpheres) {
                 if (!sphere.isReserve()) {
@@ -55,7 +58,37 @@ public class StudentPlayer extends PylosPlayer {
         }
         game.moveSphere(bestSphere, bestLocation);
     }
+    private boolean isMyFirstTurn() {
+        for (PylosSphere s : board.getSpheres(PLAYER_COLOR)) {
+            if (!s.isReserve() && s.getLocation() != null) return false;
+        }
+        return true;
+    }
 
+    private boolean tryHardcodedOpening(PylosGameIF game) {
+        PylosSphere reserve = board.getReserve(this);
+        if (reserve == null) return false;
+
+        // middenvakken op het 4x4-basisniveau (0-indexed)
+        List<int[]> centers = new ArrayList<>(Arrays.asList(
+                new int[]{1,1,0},
+                new int[]{1,2,0},
+                new int[]{2,1,0},
+                new int[]{2,2,0}
+        ));
+        // randomize om voorspelbaarheid te vermijden
+        Collections.shuffle(centers, ThreadLocalRandom.current());
+
+        for (int[] c : centers) {
+            PylosLocation loc = board.getBoardLocation(c[0], c[1], c[2]);
+            if (loc != null && loc.isUsable()) {
+                // In deze engine is 'moveSphere' ook correct voor plaatsen vanuit reserve
+                game.moveSphere(reserve, loc);
+                return true;
+            }
+        }
+        return false; // geen center vrij → normale zoeklogica
+    }
     @Override
     public void doRemove(PylosGameIF game, PylosBoard board) {
         init(game.getState(), board);
