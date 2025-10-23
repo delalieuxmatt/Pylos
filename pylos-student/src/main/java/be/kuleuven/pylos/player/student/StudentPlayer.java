@@ -268,17 +268,16 @@ public class StudentPlayer extends PylosPlayer {
 
         int myReserves = board.getReservesSize(PLAYER_COLOR);
         int oppReserves = board.getReservesSize(PLAYER_COLOR.other());
-        double score = (myReserves - oppReserves) * 100;
-        score += evaluateHeightAdvantage() * 40;
-        score += evaluateSquarePotential() * 30;
-        score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other())) * 15;
-        score += evaluateTrappedSpheres() * 20;
+        double score = (myReserves - oppReserves) * 120;
+        //score += evaluateHeightAdvantage() * 0;
+        score += evaluateSquarePotential() * 20;
+        score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other())) * 10;
+        //score += evaluateTrappedSpheres() * 0;
 
         evaluationCache.put(signature, score);
         return score;
     }
 
-    /** --- NEW METHOD --- */
     private double evaluateTrappedSpheres() {
         double score = 0;
         PylosSphere[] allSpheres = board.getSpheres();

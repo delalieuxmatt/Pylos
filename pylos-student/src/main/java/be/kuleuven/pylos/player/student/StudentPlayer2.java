@@ -288,7 +288,6 @@ public class StudentPlayer2 extends PylosPlayer {
         return score;
     }
 
-    /** --- NEW METHOD --- */
     private double evaluateTrappedSpheres() {
         double score = 0;
         PylosSphere[] allSpheres = board.getSpheres();
