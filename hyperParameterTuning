@@ -1,0 +1,1873 @@
+/home/thibaut-beck/.jdks/openjdk-25/bin/java -javaagent:/snap/intellij-idea-ultimate/668/lib/idea_rt.jar=44295 -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -classpath /home/thibaut-beck/Documents/4.1/art_int/labs/Pylos/pylos-student/target/classes:/home/thibaut-beck/Documents/4.1/art_int/labs/Pylos/pylos-core/target/classes:/home/thibaut-beck/.m2/repository/com/google/guava/guava/31.1-jre/guava-31.1-jre.jar:/home/thibaut-beck/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar:/home/thibaut-beck/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/thibaut-beck/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/home/thibaut-beck/.m2/repository/org/checkerframework/checker-qual/3.12.0/checker-qual-3.12.0.jar:/home/thibaut-beck/.m2/repository/com/google/errorprone/error_prone_annotations/2.11.0/error_prone_annotations-2.11.0.jar:/home/thibaut-beck/.m2/repository/com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.jar be.kuleuven.pylos.main.PylosMain -ea
+🚀 Starting weight tuning process...
+
+=================================================
+Testing combination 1 of 81: h=0, s=0, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=0, t=0) starts:
+ *  70.00% Student(h=0, s=0, a=0, t=0)
+ *  26.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  86.00% Student(h=0, s=0, a=0, t=0)
+ *  10.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  78.00% Student(h=0, s=0, a=0, t=0)
+ *  18.00% Minimax4
+ *   4.00% Draw
+
+CPU Time: 18.42 sec (0.18 sec / game)
+----------------------------
+
+=================================================
+Testing combination 2 of 81: h=0, s=0, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=0, t=20) starts:
+ *  84.00% Student(h=0, s=0, a=0, t=20)
+ *  12.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  82.00% Student(h=0, s=0, a=0, t=20)
+ *  10.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  83.00% Student(h=0, s=0, a=0, t=20)
+ *  11.00% Minimax4
+ *   6.00% Draw
+
+CPU Time: 16.29 sec (0.16 sec / game)
+----------------------------
+
+=================================================
+Testing combination 3 of 81: h=0, s=0, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=0, t=40) starts:
+ *  82.00% Student(h=0, s=0, a=0, t=40)
+ *   8.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  72.00% Student(h=0, s=0, a=0, t=40)
+ *  10.00% Minimax4
+ *  18.00% Draw
+
+100 games in total:
+ *  77.00% Student(h=0, s=0, a=0, t=40)
+ *   9.00% Minimax4
+ *  14.00% Draw
+
+CPU Time: 17.34 sec (0.17 sec / game)
+----------------------------
+
+=================================================
+Testing combination 4 of 81: h=0, s=0, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=50, t=0) starts:
+ *  78.00% Student(h=0, s=0, a=50, t=0)
+ *  22.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=0, s=0, a=50, t=0)
+ *  10.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  84.00% Student(h=0, s=0, a=50, t=0)
+ *  16.00% Minimax4
+ *   0.00% Draw
+
+CPU Time: 29.58 sec (0.30 sec / game)
+----------------------------
+
+=================================================
+Testing combination 5 of 81: h=0, s=0, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=50, t=20) starts:
+ *  84.00% Student(h=0, s=0, a=50, t=20)
+ *  10.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  84.00% Student(h=0, s=0, a=50, t=20)
+ *  10.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  84.00% Student(h=0, s=0, a=50, t=20)
+ *  10.00% Minimax4
+ *   6.00% Draw
+
+CPU Time: 29.86 sec (0.30 sec / game)
+----------------------------
+
+=================================================
+Testing combination 6 of 81: h=0, s=0, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=50, t=40) starts:
+ *  86.00% Student(h=0, s=0, a=50, t=40)
+ *   4.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=0, s=0, a=50, t=40)
+ *   4.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  89.00% Student(h=0, s=0, a=50, t=40)
+ *   4.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 32.05 sec (0.32 sec / game)
+----------------------------
+
+=================================================
+Testing combination 7 of 81: h=0, s=0, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=100, t=0) starts:
+ *  62.00% Student(h=0, s=0, a=100, t=0)
+ *  32.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  72.00% Student(h=0, s=0, a=100, t=0)
+ *  24.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  67.00% Student(h=0, s=0, a=100, t=0)
+ *  28.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 75.62 sec (0.76 sec / game)
+----------------------------
+
+=================================================
+Testing combination 8 of 81: h=0, s=0, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=100, t=20) starts:
+ *  78.00% Student(h=0, s=0, a=100, t=20)
+ *  16.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=0, s=0, a=100, t=20)
+ *   8.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  84.00% Student(h=0, s=0, a=100, t=20)
+ *  12.00% Minimax4
+ *   4.00% Draw
+
+CPU Time: 38.23 sec (0.38 sec / game)
+----------------------------
+
+=================================================
+Testing combination 9 of 81: h=0, s=0, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=0, a=100, t=40) starts:
+ *  80.00% Student(h=0, s=0, a=100, t=40)
+ *  12.00% Minimax4
+ *   8.00% Draw
+
+50 games where Minimax4 starts:
+ *  96.00% Student(h=0, s=0, a=100, t=40)
+ *   4.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  88.00% Student(h=0, s=0, a=100, t=40)
+ *   8.00% Minimax4
+ *   4.00% Draw
+
+CPU Time: 36.54 sec (0.37 sec / game)
+----------------------------
+
+=================================================
+Testing combination 10 of 81: h=0, s=20, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=0, t=0) starts:
+ *  98.00% Student(h=0, s=20, a=0, t=0)
+ *   2.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  98.00% Student(h=0, s=20, a=0, t=0)
+ *   0.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  98.00% Student(h=0, s=20, a=0, t=0)
+ *   1.00% Minimax4
+ *   1.00% Draw
+
+CPU Time: 60.30 sec (0.60 sec / game)
+----------------------------
+
+=================================================
+Testing combination 11 of 81: h=0, s=20, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=0, t=20) starts:
+ *  92.00% Student(h=0, s=20, a=0, t=20)
+ *   4.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=0, s=20, a=0, t=20)
+ *   0.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  91.00% Student(h=0, s=20, a=0, t=20)
+ *   2.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 55.04 sec (0.55 sec / game)
+----------------------------
+
+=================================================
+Testing combination 12 of 81: h=0, s=20, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=0, t=40) starts:
+ *  88.00% Student(h=0, s=20, a=0, t=40)
+ *   8.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  96.00% Student(h=0, s=20, a=0, t=40)
+ *   4.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  92.00% Student(h=0, s=20, a=0, t=40)
+ *   6.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 53.48 sec (0.53 sec / game)
+----------------------------
+
+=================================================
+Testing combination 13 of 81: h=0, s=20, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=50, t=0) starts:
+ * 100.00% Student(h=0, s=20, a=50, t=0)
+ *   0.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  94.00% Student(h=0, s=20, a=50, t=0)
+ *   6.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  97.00% Student(h=0, s=20, a=50, t=0)
+ *   3.00% Minimax4
+ *   0.00% Draw
+
+CPU Time: 99.89 sec (1.00 sec / game)
+----------------------------
+
+=================================================
+Testing combination 14 of 81: h=0, s=20, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=50, t=20) starts:
+ *  84.00% Student(h=0, s=20, a=50, t=20)
+ *  16.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=0, s=20, a=50, t=20)
+ *   4.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  87.00% Student(h=0, s=20, a=50, t=20)
+ *  10.00% Minimax4
+ *   3.00% Draw
+
+CPU Time: 66.64 sec (0.67 sec / game)
+----------------------------
+
+=================================================
+Testing combination 15 of 81: h=0, s=20, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=50, t=40) starts:
+ *  86.00% Student(h=0, s=20, a=50, t=40)
+ *   8.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  96.00% Student(h=0, s=20, a=50, t=40)
+ *   0.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  91.00% Student(h=0, s=20, a=50, t=40)
+ *   4.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 64.66 sec (0.65 sec / game)
+----------------------------
+
+=================================================
+Testing combination 16 of 81: h=0, s=20, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=100, t=0) starts:
+ *  80.00% Student(h=0, s=20, a=100, t=0)
+ *  20.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  80.00% Student(h=0, s=20, a=100, t=0)
+ *  14.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  80.00% Student(h=0, s=20, a=100, t=0)
+ *  17.00% Minimax4
+ *   3.00% Draw
+
+CPU Time: 139.02 sec (1.39 sec / game)
+----------------------------
+
+=================================================
+Testing combination 17 of 81: h=0, s=20, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=100, t=20) starts:
+ *  94.00% Student(h=0, s=20, a=100, t=20)
+ *   4.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  94.00% Student(h=0, s=20, a=100, t=20)
+ *   4.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  94.00% Student(h=0, s=20, a=100, t=20)
+ *   4.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 69.84 sec (0.70 sec / game)
+----------------------------
+
+=================================================
+Testing combination 18 of 81: h=0, s=20, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=20, a=100, t=40) starts:
+ *  84.00% Student(h=0, s=20, a=100, t=40)
+ *  14.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  88.00% Student(h=0, s=20, a=100, t=40)
+ *   8.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=0, s=20, a=100, t=40)
+ *  11.00% Minimax4
+ *   3.00% Draw
+
+CPU Time: 63.98 sec (0.64 sec / game)
+----------------------------
+
+=================================================
+Testing combination 19 of 81: h=0, s=40, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=0, t=0) starts:
+ *  90.00% Student(h=0, s=40, a=0, t=0)
+ *  10.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  96.00% Student(h=0, s=40, a=0, t=0)
+ *   2.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  93.00% Student(h=0, s=40, a=0, t=0)
+ *   6.00% Minimax4
+ *   1.00% Draw
+
+CPU Time: 102.03 sec (1.02 sec / game)
+----------------------------
+
+=================================================
+Testing combination 20 of 81: h=0, s=40, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=0, t=20) starts:
+ *  98.00% Student(h=0, s=40, a=0, t=20)
+ *   2.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  96.00% Student(h=0, s=40, a=0, t=20)
+ *   0.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  97.00% Student(h=0, s=40, a=0, t=20)
+ *   1.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 70.84 sec (0.71 sec / game)
+----------------------------
+
+=================================================
+Testing combination 21 of 81: h=0, s=40, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=0, t=40) starts:
+ *  94.00% Student(h=0, s=40, a=0, t=40)
+ *   0.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  86.00% Student(h=0, s=40, a=0, t=40)
+ *   8.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  90.00% Student(h=0, s=40, a=0, t=40)
+ *   4.00% Minimax4
+ *   6.00% Draw
+
+CPU Time: 68.16 sec (0.68 sec / game)
+----------------------------
+
+=================================================
+Testing combination 22 of 81: h=0, s=40, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=50, t=0) starts:
+ *  98.00% Student(h=0, s=40, a=50, t=0)
+ *   0.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=0, s=40, a=50, t=0)
+ *   8.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  95.00% Student(h=0, s=40, a=50, t=0)
+ *   4.00% Minimax4
+ *   1.00% Draw
+
+CPU Time: 155.11 sec (1.55 sec / game)
+----------------------------
+
+=================================================
+Testing combination 23 of 81: h=0, s=40, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=50, t=20) starts:
+ *  90.00% Student(h=0, s=40, a=50, t=20)
+ *   4.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  88.00% Student(h=0, s=40, a=50, t=20)
+ *   4.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  89.00% Student(h=0, s=40, a=50, t=20)
+ *   4.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 81.15 sec (0.81 sec / game)
+----------------------------
+
+=================================================
+Testing combination 24 of 81: h=0, s=40, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=50, t=40) starts:
+ *  88.00% Student(h=0, s=40, a=50, t=40)
+ *  10.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  94.00% Student(h=0, s=40, a=50, t=40)
+ *   4.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  91.00% Student(h=0, s=40, a=50, t=40)
+ *   7.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 79.10 sec (0.79 sec / game)
+----------------------------
+
+=================================================
+Testing combination 25 of 81: h=0, s=40, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=100, t=0) starts:
+ *  94.00% Student(h=0, s=40, a=100, t=0)
+ *   4.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=0, s=40, a=100, t=0)
+ *   8.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  92.00% Student(h=0, s=40, a=100, t=0)
+ *   6.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 194.11 sec (1.94 sec / game)
+----------------------------
+
+=================================================
+Testing combination 26 of 81: h=0, s=40, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=100, t=20) starts:
+ *  86.00% Student(h=0, s=40, a=100, t=20)
+ *  12.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=0, s=40, a=100, t=20)
+ *   6.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  88.00% Student(h=0, s=40, a=100, t=20)
+ *   9.00% Minimax4
+ *   3.00% Draw
+
+CPU Time: 98.10 sec (0.98 sec / game)
+----------------------------
+
+=================================================
+Testing combination 27 of 81: h=0, s=40, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=0, s=40, a=100, t=40) starts:
+ *  90.00% Student(h=0, s=40, a=100, t=40)
+ *  10.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  96.00% Student(h=0, s=40, a=100, t=40)
+ *   0.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  93.00% Student(h=0, s=40, a=100, t=40)
+ *   5.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 76.88 sec (0.77 sec / game)
+----------------------------
+
+=================================================
+Testing combination 28 of 81: h=30, s=0, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=0, t=0) starts:
+ *  82.00% Student(h=30, s=0, a=0, t=0)
+ *  14.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  80.00% Student(h=30, s=0, a=0, t=0)
+ *  20.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  81.00% Student(h=30, s=0, a=0, t=0)
+ *  17.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 24.83 sec (0.25 sec / game)
+----------------------------
+
+=================================================
+Testing combination 29 of 81: h=30, s=0, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=0, t=20) starts:
+ *  80.00% Student(h=30, s=0, a=0, t=20)
+ *  12.00% Minimax4
+ *   8.00% Draw
+
+50 games where Minimax4 starts:
+ *  78.00% Student(h=30, s=0, a=0, t=20)
+ *   6.00% Minimax4
+ *  16.00% Draw
+
+100 games in total:
+ *  79.00% Student(h=30, s=0, a=0, t=20)
+ *   9.00% Minimax4
+ *  12.00% Draw
+
+CPU Time: 25.33 sec (0.25 sec / game)
+----------------------------
+
+=================================================
+Testing combination 30 of 81: h=30, s=0, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=0, t=40) starts:
+ *  60.00% Student(h=30, s=0, a=0, t=40)
+ *  32.00% Minimax4
+ *   8.00% Draw
+
+50 games where Minimax4 starts:
+ *  84.00% Student(h=30, s=0, a=0, t=40)
+ *  10.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  72.00% Student(h=30, s=0, a=0, t=40)
+ *  21.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 22.90 sec (0.23 sec / game)
+----------------------------
+
+=================================================
+Testing combination 31 of 81: h=30, s=0, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=50, t=0) starts:
+ *  88.00% Student(h=30, s=0, a=50, t=0)
+ *  12.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  88.00% Student(h=30, s=0, a=50, t=0)
+ *  12.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  88.00% Student(h=30, s=0, a=50, t=0)
+ *  12.00% Minimax4
+ *   0.00% Draw
+
+CPU Time: 44.54 sec (0.45 sec / game)
+----------------------------
+
+=================================================
+Testing combination 32 of 81: h=30, s=0, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=50, t=20) starts:
+ *  78.00% Student(h=30, s=0, a=50, t=20)
+ *  16.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  86.00% Student(h=30, s=0, a=50, t=20)
+ *   6.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  82.00% Student(h=30, s=0, a=50, t=20)
+ *  11.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 35.24 sec (0.35 sec / game)
+----------------------------
+
+=================================================
+Testing combination 33 of 81: h=30, s=0, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=50, t=40) starts:
+ *  86.00% Student(h=30, s=0, a=50, t=40)
+ *  14.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=30, s=0, a=50, t=40)
+ *   2.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  88.00% Student(h=30, s=0, a=50, t=40)
+ *   8.00% Minimax4
+ *   4.00% Draw
+
+CPU Time: 35.11 sec (0.35 sec / game)
+----------------------------
+
+=================================================
+Testing combination 34 of 81: h=30, s=0, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=100, t=0) starts:
+ *  70.00% Student(h=30, s=0, a=100, t=0)
+ *  26.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=30, s=0, a=100, t=0)
+ *   8.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  81.00% Student(h=30, s=0, a=100, t=0)
+ *  17.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 100.38 sec (1.00 sec / game)
+----------------------------
+
+=================================================
+Testing combination 35 of 81: h=30, s=0, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=100, t=20) starts:
+ *  82.00% Student(h=30, s=0, a=100, t=20)
+ *  12.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  84.00% Student(h=30, s=0, a=100, t=20)
+ *   4.00% Minimax4
+ *  12.00% Draw
+
+100 games in total:
+ *  83.00% Student(h=30, s=0, a=100, t=20)
+ *   8.00% Minimax4
+ *   9.00% Draw
+
+CPU Time: 46.61 sec (0.47 sec / game)
+----------------------------
+
+=================================================
+Testing combination 36 of 81: h=30, s=0, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=0, a=100, t=40) starts:
+ *  84.00% Student(h=30, s=0, a=100, t=40)
+ *  16.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  88.00% Student(h=30, s=0, a=100, t=40)
+ *   6.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=30, s=0, a=100, t=40)
+ *  11.00% Minimax4
+ *   3.00% Draw
+
+CPU Time: 42.46 sec (0.42 sec / game)
+----------------------------
+
+=================================================
+Testing combination 37 of 81: h=30, s=20, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=0, t=0) starts:
+ *  88.00% Student(h=30, s=20, a=0, t=0)
+ *  10.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  86.00% Student(h=30, s=20, a=0, t=0)
+ *  12.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  87.00% Student(h=30, s=20, a=0, t=0)
+ *  11.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 60.46 sec (0.60 sec / game)
+----------------------------
+
+=================================================
+Testing combination 38 of 81: h=30, s=20, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=0, t=20) starts:
+ *  78.00% Student(h=30, s=20, a=0, t=20)
+ *  12.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=30, s=20, a=0, t=20)
+ *   4.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  85.00% Student(h=30, s=20, a=0, t=20)
+ *   8.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 53.57 sec (0.54 sec / game)
+----------------------------
+
+=================================================
+Testing combination 39 of 81: h=30, s=20, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=0, t=40) starts:
+ *  84.00% Student(h=30, s=20, a=0, t=40)
+ *  10.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  84.00% Student(h=30, s=20, a=0, t=40)
+ *   8.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  84.00% Student(h=30, s=20, a=0, t=40)
+ *   9.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 57.23 sec (0.57 sec / game)
+----------------------------
+
+=================================================
+Testing combination 40 of 81: h=30, s=20, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=50, t=0) starts:
+ *  90.00% Student(h=30, s=20, a=50, t=0)
+ *  10.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=30, s=20, a=50, t=0)
+ *   8.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  91.00% Student(h=30, s=20, a=50, t=0)
+ *   9.00% Minimax4
+ *   0.00% Draw
+
+CPU Time: 102.83 sec (1.03 sec / game)
+----------------------------
+
+=================================================
+Testing combination 41 of 81: h=30, s=20, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=50, t=20) starts:
+ *  92.00% Student(h=30, s=20, a=50, t=20)
+ *   4.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  96.00% Student(h=30, s=20, a=50, t=20)
+ *   2.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  94.00% Student(h=30, s=20, a=50, t=20)
+ *   3.00% Minimax4
+ *   3.00% Draw
+
+CPU Time: 69.15 sec (0.69 sec / game)
+----------------------------
+
+=================================================
+Testing combination 42 of 81: h=30, s=20, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=50, t=40) starts:
+ *  78.00% Student(h=30, s=20, a=50, t=40)
+ *  10.00% Minimax4
+ *  12.00% Draw
+
+50 games where Minimax4 starts:
+ *  86.00% Student(h=30, s=20, a=50, t=40)
+ *   4.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  82.00% Student(h=30, s=20, a=50, t=40)
+ *   7.00% Minimax4
+ *  11.00% Draw
+
+CPU Time: 66.90 sec (0.67 sec / game)
+----------------------------
+
+=================================================
+Testing combination 43 of 81: h=30, s=20, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=100, t=0) starts:
+ *  84.00% Student(h=30, s=20, a=100, t=0)
+ *  14.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  82.00% Student(h=30, s=20, a=100, t=0)
+ *  12.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  83.00% Student(h=30, s=20, a=100, t=0)
+ *  13.00% Minimax4
+ *   4.00% Draw
+
+CPU Time: 157.61 sec (1.58 sec / game)
+----------------------------
+
+=================================================
+Testing combination 44 of 81: h=30, s=20, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=100, t=20) starts:
+ *  82.00% Student(h=30, s=20, a=100, t=20)
+ *  14.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=30, s=20, a=100, t=20)
+ *   8.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=30, s=20, a=100, t=20)
+ *  11.00% Minimax4
+ *   3.00% Draw
+
+CPU Time: 76.32 sec (0.76 sec / game)
+----------------------------
+
+=================================================
+Testing combination 45 of 81: h=30, s=20, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=20, a=100, t=40) starts:
+ *  88.00% Student(h=30, s=20, a=100, t=40)
+ *  12.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  86.00% Student(h=30, s=20, a=100, t=40)
+ *   4.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  87.00% Student(h=30, s=20, a=100, t=40)
+ *   8.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 70.64 sec (0.71 sec / game)
+----------------------------
+
+=================================================
+Testing combination 46 of 81: h=30, s=40, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=0, t=0) starts:
+ *  84.00% Student(h=30, s=40, a=0, t=0)
+ *  16.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=30, s=40, a=0, t=0)
+ *   8.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  87.00% Student(h=30, s=40, a=0, t=0)
+ *  12.00% Minimax4
+ *   1.00% Draw
+
+CPU Time: 106.95 sec (1.07 sec / game)
+----------------------------
+
+=================================================
+Testing combination 47 of 81: h=30, s=40, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=0, t=20) starts:
+ *  90.00% Student(h=30, s=40, a=0, t=20)
+ *   4.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  98.00% Student(h=30, s=40, a=0, t=20)
+ *   0.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  94.00% Student(h=30, s=40, a=0, t=20)
+ *   2.00% Minimax4
+ *   4.00% Draw
+
+CPU Time: 68.88 sec (0.69 sec / game)
+----------------------------
+
+=================================================
+Testing combination 48 of 81: h=30, s=40, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=0, t=40) starts:
+ *  88.00% Student(h=30, s=40, a=0, t=40)
+ *   4.00% Minimax4
+ *   8.00% Draw
+
+50 games where Minimax4 starts:
+ *  84.00% Student(h=30, s=40, a=0, t=40)
+ *  10.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=30, s=40, a=0, t=40)
+ *   7.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 68.68 sec (0.69 sec / game)
+----------------------------
+
+=================================================
+Testing combination 49 of 81: h=30, s=40, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=50, t=0) starts:
+ *  98.00% Student(h=30, s=40, a=50, t=0)
+ *   2.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  94.00% Student(h=30, s=40, a=50, t=0)
+ *   4.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  96.00% Student(h=30, s=40, a=50, t=0)
+ *   3.00% Minimax4
+ *   1.00% Draw
+
+CPU Time: 151.43 sec (1.51 sec / game)
+----------------------------
+
+=================================================
+Testing combination 50 of 81: h=30, s=40, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=50, t=20) starts:
+ *  78.00% Student(h=30, s=40, a=50, t=20)
+ *  16.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  94.00% Student(h=30, s=40, a=50, t=20)
+ *   4.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=30, s=40, a=50, t=20)
+ *  10.00% Minimax4
+ *   4.00% Draw
+
+CPU Time: 84.31 sec (0.84 sec / game)
+----------------------------
+
+=================================================
+Testing combination 51 of 81: h=30, s=40, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=50, t=40) starts:
+ *  88.00% Student(h=30, s=40, a=50, t=40)
+ *   8.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  86.00% Student(h=30, s=40, a=50, t=40)
+ *   8.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  87.00% Student(h=30, s=40, a=50, t=40)
+ *   8.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 81.94 sec (0.82 sec / game)
+----------------------------
+
+=================================================
+Testing combination 52 of 81: h=30, s=40, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=100, t=0) starts:
+ *  74.00% Student(h=30, s=40, a=100, t=0)
+ *  24.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=30, s=40, a=100, t=0)
+ *   8.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  83.00% Student(h=30, s=40, a=100, t=0)
+ *  16.00% Minimax4
+ *   1.00% Draw
+
+CPU Time: 168.43 sec (1.68 sec / game)
+----------------------------
+
+=================================================
+Testing combination 53 of 81: h=30, s=40, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=100, t=20) starts:
+ *  90.00% Student(h=30, s=40, a=100, t=20)
+ *   6.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=30, s=40, a=100, t=20)
+ *   2.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  91.00% Student(h=30, s=40, a=100, t=20)
+ *   4.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 90.51 sec (0.91 sec / game)
+----------------------------
+
+=================================================
+Testing combination 54 of 81: h=30, s=40, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=30, s=40, a=100, t=40) starts:
+ *  82.00% Student(h=30, s=40, a=100, t=40)
+ *   8.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=30, s=40, a=100, t=40)
+ *   0.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=30, s=40, a=100, t=40)
+ *   4.00% Minimax4
+ *  10.00% Draw
+
+CPU Time: 87.25 sec (0.87 sec / game)
+----------------------------
+
+=================================================
+Testing combination 55 of 81: h=60, s=0, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=0, t=0) starts:
+ *  38.00% Student(h=60, s=0, a=0, t=0)
+ *  62.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  50.00% Student(h=60, s=0, a=0, t=0)
+ *  46.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  44.00% Student(h=60, s=0, a=0, t=0)
+ *  54.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 20.36 sec (0.20 sec / game)
+----------------------------
+
+=================================================
+Testing combination 56 of 81: h=60, s=0, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=0, t=20) starts:
+ *  86.00% Student(h=60, s=0, a=0, t=20)
+ *   4.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  82.00% Student(h=60, s=0, a=0, t=20)
+ *   8.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  84.00% Student(h=60, s=0, a=0, t=20)
+ *   6.00% Minimax4
+ *  10.00% Draw
+
+CPU Time: 22.02 sec (0.22 sec / game)
+----------------------------
+
+=================================================
+Testing combination 57 of 81: h=60, s=0, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=0, t=40) starts:
+ *  70.00% Student(h=60, s=0, a=0, t=40)
+ *  26.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=60, s=0, a=0, t=40)
+ *   4.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  81.00% Student(h=60, s=0, a=0, t=40)
+ *  15.00% Minimax4
+ *   4.00% Draw
+
+CPU Time: 22.44 sec (0.22 sec / game)
+----------------------------
+
+=================================================
+Testing combination 58 of 81: h=60, s=0, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=50, t=0) starts:
+ *  68.00% Student(h=60, s=0, a=50, t=0)
+ *  32.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  76.00% Student(h=60, s=0, a=50, t=0)
+ *  24.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  72.00% Student(h=60, s=0, a=50, t=0)
+ *  28.00% Minimax4
+ *   0.00% Draw
+
+CPU Time: 47.11 sec (0.47 sec / game)
+----------------------------
+
+=================================================
+Testing combination 59 of 81: h=60, s=0, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=50, t=20) starts:
+ *  76.00% Student(h=60, s=0, a=50, t=20)
+ *  18.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  88.00% Student(h=60, s=0, a=50, t=20)
+ *   2.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  82.00% Student(h=60, s=0, a=50, t=20)
+ *  10.00% Minimax4
+ *   8.00% Draw
+
+CPU Time: 34.63 sec (0.35 sec / game)
+----------------------------
+
+=================================================
+Testing combination 60 of 81: h=60, s=0, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=50, t=40) starts:
+ *  84.00% Student(h=60, s=0, a=50, t=40)
+ *   6.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  82.00% Student(h=60, s=0, a=50, t=40)
+ *  14.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  83.00% Student(h=60, s=0, a=50, t=40)
+ *  10.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 36.71 sec (0.37 sec / game)
+----------------------------
+
+=================================================
+Testing combination 61 of 81: h=60, s=0, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=100, t=0) starts:
+ *  72.00% Student(h=60, s=0, a=100, t=0)
+ *  28.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  72.00% Student(h=60, s=0, a=100, t=0)
+ *  26.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  72.00% Student(h=60, s=0, a=100, t=0)
+ *  27.00% Minimax4
+ *   1.00% Draw
+
+CPU Time: 100.16 sec (1.00 sec / game)
+----------------------------
+
+=================================================
+Testing combination 62 of 81: h=60, s=0, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=100, t=20) starts:
+ *  72.00% Student(h=60, s=0, a=100, t=20)
+ *  22.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  88.00% Student(h=60, s=0, a=100, t=20)
+ *   4.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  80.00% Student(h=60, s=0, a=100, t=20)
+ *  13.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 49.52 sec (0.50 sec / game)
+----------------------------
+
+=================================================
+Testing combination 63 of 81: h=60, s=0, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=0, a=100, t=40) starts:
+ *  74.00% Student(h=60, s=0, a=100, t=40)
+ *  18.00% Minimax4
+ *   8.00% Draw
+
+50 games where Minimax4 starts:
+ *  92.00% Student(h=60, s=0, a=100, t=40)
+ *   6.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  83.00% Student(h=60, s=0, a=100, t=40)
+ *  12.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 42.10 sec (0.42 sec / game)
+----------------------------
+
+=================================================
+Testing combination 64 of 81: h=60, s=20, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=0, t=0) starts:
+ *  68.00% Student(h=60, s=20, a=0, t=0)
+ *  30.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  72.00% Student(h=60, s=20, a=0, t=0)
+ *  26.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  70.00% Student(h=60, s=20, a=0, t=0)
+ *  28.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 56.29 sec (0.56 sec / game)
+----------------------------
+
+=================================================
+Testing combination 65 of 81: h=60, s=20, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=0, t=20) starts:
+ *  82.00% Student(h=60, s=20, a=0, t=20)
+ *   8.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=60, s=20, a=0, t=20)
+ *   4.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=60, s=20, a=0, t=20)
+ *   6.00% Minimax4
+ *   8.00% Draw
+
+CPU Time: 54.57 sec (0.55 sec / game)
+----------------------------
+
+=================================================
+Testing combination 66 of 81: h=60, s=20, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=0, t=40) starts:
+ *  86.00% Student(h=60, s=20, a=0, t=40)
+ *   8.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  86.00% Student(h=60, s=20, a=0, t=40)
+ *   2.00% Minimax4
+ *  12.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=60, s=20, a=0, t=40)
+ *   5.00% Minimax4
+ *   9.00% Draw
+
+CPU Time: 52.67 sec (0.53 sec / game)
+----------------------------
+
+=================================================
+Testing combination 67 of 81: h=60, s=20, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=50, t=0) starts:
+ *  84.00% Student(h=60, s=20, a=50, t=0)
+ *  16.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=60, s=20, a=50, t=0)
+ *  10.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  87.00% Student(h=60, s=20, a=50, t=0)
+ *  13.00% Minimax4
+ *   0.00% Draw
+
+CPU Time: 106.96 sec (1.07 sec / game)
+----------------------------
+
+=================================================
+Testing combination 68 of 81: h=60, s=20, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=50, t=20) starts:
+ *  82.00% Student(h=60, s=20, a=50, t=20)
+ *  12.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  88.00% Student(h=60, s=20, a=50, t=20)
+ *   4.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  85.00% Student(h=60, s=20, a=50, t=20)
+ *   8.00% Minimax4
+ *   7.00% Draw
+
+CPU Time: 71.59 sec (0.72 sec / game)
+----------------------------
+
+=================================================
+Testing combination 69 of 81: h=60, s=20, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=50, t=40) starts:
+ *  82.00% Student(h=60, s=20, a=50, t=40)
+ *   8.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  82.00% Student(h=60, s=20, a=50, t=40)
+ *   8.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  82.00% Student(h=60, s=20, a=50, t=40)
+ *   8.00% Minimax4
+ *  10.00% Draw
+
+CPU Time: 68.25 sec (0.68 sec / game)
+----------------------------
+
+=================================================
+Testing combination 70 of 81: h=60, s=20, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=100, t=0) starts:
+ *  70.00% Student(h=60, s=20, a=100, t=0)
+ *  30.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  80.00% Student(h=60, s=20, a=100, t=0)
+ *  20.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  75.00% Student(h=60, s=20, a=100, t=0)
+ *  25.00% Minimax4
+ *   0.00% Draw
+
+CPU Time: 148.98 sec (1.49 sec / game)
+----------------------------
+
+=================================================
+Testing combination 71 of 81: h=60, s=20, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=100, t=20) starts:
+ *  86.00% Student(h=60, s=20, a=100, t=20)
+ *   8.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  88.00% Student(h=60, s=20, a=100, t=20)
+ *   6.00% Minimax4
+ *   6.00% Draw
+
+100 games in total:
+ *  87.00% Student(h=60, s=20, a=100, t=20)
+ *   7.00% Minimax4
+ *   6.00% Draw
+
+CPU Time: 76.04 sec (0.76 sec / game)
+----------------------------
+
+=================================================
+Testing combination 72 of 81: h=60, s=20, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=20, a=100, t=40) starts:
+ *  80.00% Student(h=60, s=20, a=100, t=40)
+ *  12.00% Minimax4
+ *   8.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=60, s=20, a=100, t=40)
+ *   6.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  85.00% Student(h=60, s=20, a=100, t=40)
+ *   9.00% Minimax4
+ *   6.00% Draw
+
+CPU Time: 69.58 sec (0.70 sec / game)
+----------------------------
+
+=================================================
+Testing combination 73 of 81: h=60, s=40, a=0, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=0, t=0) starts:
+ *  64.00% Student(h=60, s=40, a=0, t=0)
+ *  36.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  70.00% Student(h=60, s=40, a=0, t=0)
+ *  30.00% Minimax4
+ *   0.00% Draw
+
+100 games in total:
+ *  67.00% Student(h=60, s=40, a=0, t=0)
+ *  33.00% Minimax4
+ *   0.00% Draw
+
+CPU Time: 97.94 sec (0.98 sec / game)
+----------------------------
+
+=================================================
+Testing combination 74 of 81: h=60, s=40, a=0, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=0, t=20) starts:
+ *  96.00% Student(h=60, s=40, a=0, t=20)
+ *   2.00% Minimax4
+ *   2.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=60, s=40, a=0, t=20)
+ *   2.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  93.00% Student(h=60, s=40, a=0, t=20)
+ *   2.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 73.61 sec (0.74 sec / game)
+----------------------------
+
+=================================================
+Testing combination 75 of 81: h=60, s=40, a=0, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=0, t=40) starts:
+ *  84.00% Student(h=60, s=40, a=0, t=40)
+ *   8.00% Minimax4
+ *   8.00% Draw
+
+50 games where Minimax4 starts:
+ *  84.00% Student(h=60, s=40, a=0, t=40)
+ *   8.00% Minimax4
+ *   8.00% Draw
+
+100 games in total:
+ *  84.00% Student(h=60, s=40, a=0, t=40)
+ *   8.00% Minimax4
+ *   8.00% Draw
+
+CPU Time: 72.86 sec (0.73 sec / game)
+----------------------------
+
+=================================================
+Testing combination 76 of 81: h=60, s=40, a=50, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=50, t=0) starts:
+ *  80.00% Student(h=60, s=40, a=50, t=0)
+ *  20.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  78.00% Student(h=60, s=40, a=50, t=0)
+ *  18.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  79.00% Student(h=60, s=40, a=50, t=0)
+ *  19.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 140.35 sec (1.40 sec / game)
+----------------------------
+
+=================================================
+Testing combination 77 of 81: h=60, s=40, a=50, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=50, t=20) starts:
+ *  88.00% Student(h=60, s=40, a=50, t=20)
+ *   6.00% Minimax4
+ *   6.00% Draw
+
+50 games where Minimax4 starts:
+ *  96.00% Student(h=60, s=40, a=50, t=20)
+ *   0.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  92.00% Student(h=60, s=40, a=50, t=20)
+ *   3.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 85.61 sec (0.86 sec / game)
+----------------------------
+
+=================================================
+Testing combination 78 of 81: h=60, s=40, a=50, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=50, t=40) starts:
+ *  76.00% Student(h=60, s=40, a=50, t=40)
+ *  14.00% Minimax4
+ *  10.00% Draw
+
+50 games where Minimax4 starts:
+ *  84.00% Student(h=60, s=40, a=50, t=40)
+ *   6.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  80.00% Student(h=60, s=40, a=50, t=40)
+ *  10.00% Minimax4
+ *  10.00% Draw
+
+CPU Time: 84.42 sec (0.84 sec / game)
+----------------------------
+
+=================================================
+Testing combination 79 of 81: h=60, s=40, a=100, t=0
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=100, t=0) starts:
+ *  66.00% Student(h=60, s=40, a=100, t=0)
+ *  30.00% Minimax4
+ *   4.00% Draw
+
+50 games where Minimax4 starts:
+ *  74.00% Student(h=60, s=40, a=100, t=0)
+ *  24.00% Minimax4
+ *   2.00% Draw
+
+100 games in total:
+ *  70.00% Student(h=60, s=40, a=100, t=0)
+ *  27.00% Minimax4
+ *   3.00% Draw
+
+CPU Time: 188.74 sec (1.89 sec / game)
+----------------------------
+
+=================================================
+Testing combination 80 of 81: h=60, s=40, a=100, t=20
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=100, t=20) starts:
+ *  96.00% Student(h=60, s=40, a=100, t=20)
+ *   4.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  90.00% Student(h=60, s=40, a=100, t=20)
+ *   6.00% Minimax4
+ *   4.00% Draw
+
+100 games in total:
+ *  93.00% Student(h=60, s=40, a=100, t=20)
+ *   5.00% Minimax4
+ *   2.00% Draw
+
+CPU Time: 89.70 sec (0.90 sec / game)
+----------------------------
+
+=================================================
+Testing combination 81 of 81: h=60, s=40, a=100, t=40
+=================================================
+
+----------------------------
+50 games where Student(h=60, s=40, a=100, t=40) starts:
+ *  88.00% Student(h=60, s=40, a=100, t=40)
+ *  12.00% Minimax4
+ *   0.00% Draw
+
+50 games where Minimax4 starts:
+ *  84.00% Student(h=60, s=40, a=100, t=40)
+ *   6.00% Minimax4
+ *  10.00% Draw
+
+100 games in total:
+ *  86.00% Student(h=60, s=40, a=100, t=40)
+ *   9.00% Minimax4
+ *   5.00% Draw
+
+CPU Time: 79.87 sec (0.80 sec / game)
+----------------------------
+
+=================================================
+🏆 Weight Tuning Complete 🏆
+Total time: 782.323 seconds.
+Total combinations tested: 81
+=================================================
+
+Process finished with exit code 0
