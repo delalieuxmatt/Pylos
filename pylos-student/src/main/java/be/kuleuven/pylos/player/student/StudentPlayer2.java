@@ -2,20 +2,31 @@ package be.kuleuven.pylos.player.student;
 
 import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.*;
 
-public class StudentPlayer extends PylosPlayer {
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class StudentPlayer2 extends PylosPlayer {
     private PylosGameSimulator simulator;
     private PylosBoard board;
     private double bestMinimax;
     private PylosSphere bestSphere;
     private PylosLocation bestLocation;
     private int branchDepth;
+    private int heightScore, squareScore, availableScore, trappedScore;
 
+    public StudentPlayer2(int heightScore, int squareScore, int availableScore, int trappedScore){
+        this.heightScore = heightScore;
+        this.squareScore = squareScore;
+        this.availableScore = availableScore;
+        this.trappedScore = trappedScore;
+    }
 
-
-    private final Map<Long, Double> evaluationCache = new HashMap<>();
+    private final LinkedHashMap<Long, Double> evaluationCache = new LinkedHashMap<Long, Double>(10000, 0.75f, true) {
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > 10000;
+        }
+    };
     private static final double WIN_THIS = 2000;
     private static final double WIN_OTHER = -2000;
     private static final double INITIAL_THIS = -9999;
@@ -269,11 +280,10 @@ public class StudentPlayer extends PylosPlayer {
         int myReserves = board.getReservesSize(PLAYER_COLOR);
         int oppReserves = board.getReservesSize(PLAYER_COLOR.other());
         double score = (myReserves - oppReserves) * 100;
-        score += evaluateHeightAdvantage() * 40;
-        score += evaluateSquarePotential() * 30;
-        score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other())) * 15;
-        score += evaluateTrappedSpheres() * 20;
-
+        score += evaluateHeightAdvantage() * heightScore;
+        score += evaluateSquarePotential() * squareScore;
+        score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other())) * availableScore;
+        score += evaluateTrappedSpheres() * trappedScore;
         evaluationCache.put(signature, score);
         return score;
     }
