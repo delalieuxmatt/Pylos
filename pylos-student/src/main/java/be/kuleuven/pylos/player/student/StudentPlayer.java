@@ -20,7 +20,7 @@ public class StudentPlayer extends PylosPlayer {
     private static final double WIN_OTHER = -2000;
     private static final double INITIAL_THIS = -9999;
     private static final double INITIAL_OTHER = 9999;
-    private static final int MAX_BRANCH_DEPTH = 6;
+    private int MAX_BRANCH_DEPTH = 6;
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
@@ -270,9 +270,9 @@ public class StudentPlayer extends PylosPlayer {
         int oppReserves = board.getReservesSize(PLAYER_COLOR.other());
         double score = (myReserves - oppReserves) * 120;
         //score += evaluateHeightAdvantage() * 0;
-        score += evaluateSquarePotential() * 20;
-        score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other())) * 10;
-        //score += evaluateTrappedSpheres() * 0;
+        //score += evaluateSquarePotential() * 20;
+        score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other())) * 150;
+        score += evaluateTrappedSpheres() * 200;
 
         evaluationCache.put(signature, score);
         return score;

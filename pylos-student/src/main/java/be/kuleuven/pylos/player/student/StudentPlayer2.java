@@ -13,13 +13,14 @@ public class StudentPlayer2 extends PylosPlayer {
     private PylosSphere bestSphere;
     private PylosLocation bestLocation;
     private int branchDepth;
-    private int heightScore, squareScore, availableScore, trappedScore;
+    private int heightScore, squareScore, availableScore, trappedScore, reserveScore;
 
-    public StudentPlayer2(int heightScore, int squareScore, int availableScore, int trappedScore){
+    public StudentPlayer2(int heightScore, int squareScore, int availableScore, int trappedScore, int reserveScore){
         this.heightScore = heightScore;
         this.squareScore = squareScore;
         this.availableScore = availableScore;
         this.trappedScore = trappedScore;
+        this.reserveScore = squareScore;
     }
 
     private final LinkedHashMap<Long, Double> evaluationCache = new LinkedHashMap<Long, Double>(10000, 0.75f, true) {
@@ -279,7 +280,7 @@ public class StudentPlayer2 extends PylosPlayer {
 
         int myReserves = board.getReservesSize(PLAYER_COLOR);
         int oppReserves = board.getReservesSize(PLAYER_COLOR.other());
-        double score = (myReserves - oppReserves) * 100;
+        double score = (myReserves - oppReserves) * reserveScore;
         score += evaluateHeightAdvantage() * heightScore;
         score += evaluateSquarePotential() * squareScore;
         score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other())) * availableScore;
