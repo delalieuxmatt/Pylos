@@ -29,10 +29,10 @@ public class PylosMLTest {
                 }
             };
 
-            PylosPlayerType opp = new PylosPlayerType("MM2") {
+            PylosPlayerType opp = new PylosPlayerType("MM8") {
                 @Override
                 public PylosPlayer create() {
-                    return new PylosPlayerMiniMax(2);
+                    return new PylosPlayerMiniMax(8);
                 }
             };
 

@@ -40,16 +40,19 @@ public class PylosMLCollect {
     }
 
     public static List<PlayedGame> collectGames() {
+
+        //things to consider: more or less overfitting if always same players playing?
+
         PylosPlayerType p1 = new PylosPlayerType("BF") {
             @Override
             public PylosPlayer create() {
                 return new PylosPlayerBestFit();
             }
         };
-        PylosPlayerType p2 = new PylosPlayerType("MM2") {
+        PylosPlayerType p2 = new PylosPlayerType("MM8") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(2);
+                return new PylosPlayerMiniMax(8);
             }
         };
 
