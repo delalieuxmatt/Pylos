@@ -32,7 +32,7 @@ def main():
     print("boards:", boards)
     print("scores:", scores)
 
-    model.fit(boards, scores, epochs=EPOCHS, batch_size=BATCH_SIZE)
+    model.fit(boards, scores, epochs=EPOCHS, batch_size=BATCH_SIZE, validation_split=0.2)
 
     # Save the model as SavedModel, with date and time as the name
     model.export(MODEL_EXPORT_PATH + datetime.datetime.now().strftime("%Y%m%d-%H%M"))
