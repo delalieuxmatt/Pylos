@@ -13,14 +13,22 @@ public class StudentPlayer extends PylosPlayer {
     private PylosLocation bestLocation;
     private int branchDepth;
 
-
-
     private final Map<Long, Double> evaluationCache = new HashMap<>();
     private static final double WIN_THIS = 2000;
     private static final double WIN_OTHER = -2000;
     private static final double INITIAL_THIS = -9999;
     private static final double INITIAL_OTHER = 9999;
     private static final int MAX_BRANCH_DEPTH = 6;
+
+    private void init(PylosGameState state, PylosBoard board) {
+        this.simulator = new PylosGameSimulator(state, PLAYER_COLOR, board);
+        this.board = board;
+        this.bestMinimax = INITIAL_THIS;
+        this.bestSphere = null;
+        this.bestLocation = null;
+        this.branchDepth = 0;
+        this.evaluationCache.clear();
+    }
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
@@ -121,16 +129,6 @@ public class StudentPlayer extends PylosPlayer {
         }
     }
 
-    private void init(PylosGameState state, PylosBoard board) {
-        this.simulator = new PylosGameSimulator(state, PLAYER_COLOR, board);
-        this.board = board;
-        this.bestMinimax = INITIAL_THIS;
-        this.bestSphere = null;
-        this.bestLocation = null;
-        this.branchDepth = 0;
-        this.evaluationCache.clear();
-    }
-
     private void eval(double minimax, PylosSphere sphere, PylosLocation location) {
         if (minimax > bestMinimax) {
             bestMinimax = minimax;
@@ -163,13 +161,12 @@ public class StudentPlayer extends PylosPlayer {
         }
         PylosGameState state = simulator.getState();
         branchDepth++;
-        double result;
-        switch (state) {
-            case MOVE: result = branchDoMove(alpha, beta); break;
-            case REMOVE_FIRST: result = branchDoRemove(alpha, beta); break;
-            case REMOVE_SECOND: result = branchDoRemoveOrPass(alpha, beta); break;
-            default: throw new IllegalStateException("Unexpected game state: " + state);
-        }
+        double result = switch (state) {
+            case MOVE -> branchDoMove(alpha, beta);
+            case REMOVE_FIRST -> branchDoRemove(alpha, beta);
+            case REMOVE_SECOND -> branchDoRemoveOrPass(alpha, beta);
+            default -> throw new IllegalStateException("Unexpected game state: " + state);
+        };
         branchDepth--;
         return result;
     }
@@ -269,45 +266,10 @@ public class StudentPlayer extends PylosPlayer {
         int myReserves = board.getReservesSize(PLAYER_COLOR);
         int oppReserves = board.getReservesSize(PLAYER_COLOR.other());
         double score = (myReserves - oppReserves) * 120;
-        //score += evaluateHeightAdvantage() * 0;
         score += evaluateSquarePotential() * 20;
         score += (countAvailableMoves(PLAYER_COLOR) - countAvailableMoves(PLAYER_COLOR.other())) * 10;
-        //score += evaluateTrappedSpheres() * 0;
 
         evaluationCache.put(signature, score);
-        return score;
-    }
-
-    private double evaluateTrappedSpheres() {
-        double score = 0;
-        PylosSphere[] allSpheres = board.getSpheres();
-        for (PylosSphere sphere : allSpheres) {
-            if (sphere.isReserve()) continue;
-            PylosLocation loc = sphere.getLocation();
-            if (loc == null || loc.Z == 3) continue;
-
-            int x = loc.X;
-            int y = loc.Y;
-            int z = loc.Z;
-            boolean isTrapped = false;
-            int[][] upperOffsets = {{0, 0}, {-1, 0}, {0, -1}, {-1, -1}};
-
-            for (int[] offset : upperOffsets) {
-                int upperX = x + offset[0];
-                int upperY = y + offset[1];
-                int upperZ = z + 1;
-                if (upperX >= 0 && upperY >= 0 && upperX < (4 - upperZ) && upperY < (4 - upperZ)) {
-                    PylosLocation upperLoc = board.getBoardLocation(upperX, upperY, upperZ);
-                    if (upperLoc != null && upperLoc.getSphere() != null) {
-                        isTrapped = true;
-                        break;
-                    }
-                }
-            }
-            if (isTrapped) {
-                if (sphere.PLAYER_COLOR == PLAYER_COLOR) score -= 15; else score += 15;
-            }
-        }
         return score;
     }
 
@@ -327,26 +289,6 @@ public class StudentPlayer extends PylosPlayer {
         return sphere.PLAYER_COLOR == PLAYER_COLOR ? 1 : 2;
     }
 
-    private double evaluateHeightAdvantage() {
-        int[] myCounts = new int[4];
-        int[] oppCounts = new int[4];
-        countHeights(board.getSpheres(PLAYER_COLOR), myCounts);
-        countHeights(board.getSpheres(PLAYER_COLOR.other()), oppCounts);
-        double score = 0;
-        for (int level = 0; level < 4; level++) {
-            score += (myCounts[level] - oppCounts[level]) * Math.pow(2, level);
-        }
-        return score;
-    }
-
-    private void countHeights(PylosSphere[] spheres, int[] counts) {
-        for (PylosSphere sphere : spheres) {
-            if (!sphere.isReserve()) {
-                PylosLocation loc = sphere.getLocation();
-                if (loc != null) counts[loc.Z]++;
-            }
-        }
-    }
 
     private double evaluateSquarePotential() {
         double score = 0;
