@@ -8,39 +8,107 @@ import be.kuleuven.pylos.player.PylosPlayerType;
 import be.kuleuven.pylos.player.codes.PylosPlayerBestFit;
 import be.kuleuven.pylos.player.codes.PylosPlayerMiniMax;
 import com.google.gson.*;
-import org.tensorflow.SavedModelBundle;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
-
+import java.util.*;
 
 public class PylosMLCollect {
-    public static final String EXPORT_PATH = "pylos-ml/src/main/training/resources/games/0.json";
-    public final static String MODEL_PATH = "pylos-ml/src/main/training/resources/models/latest";
+
+    public static final String EXPORT_PATH = "games/all_battles.json";
 
     public static void main(String[] args) throws IOException {
-        // Collect games
-        List<PlayedGame> playedGames = PylosMLCollect.collectGames();
+        // 1) run alle battles en verzamel BattleResults
+        List<BattleResult> battleResults = runAllBattles();
 
-        System.out.println("Played games: " + playedGames.size());
+        // 2) alle PlayedGame's samenvoegen in één lijst
+        List<PlayedGame> allGames = new ArrayList<>();
+        for (BattleResult br : battleResults) {
+            allGames.addAll(br.playedGames);
+        }
 
-        // Export to json file
-        File file = new File(EXPORT_PATH);
-        Files.createDirectories(file.getParentFile().toPath());
-        FileWriter writer = new FileWriter(file);
-        Gson gson = new GsonBuilder().create();
+        System.out.println("Total played games over all battles: " + allGames.size());
 
-        gson.toJson(playedGames, writer);
-
-        writer.flush();
-        writer.close();
-
-        System.out.println("Exported to: " + EXPORT_PATH);
+        // 3) alles samen in één JSON-bestand steken
+        exportGames(allGames, EXPORT_PATH);
     }
 
+    /**
+     * Deze methode:
+     *  - definieert meerdere spelers (met verschillende parameters),
+     *  - laat alle (gewenste) combinaties tegen elkaar spelen,
+     *  - en geeft een lijst van BattleResult terug.
+     */
+    public static List<BattleResult> runAllBattles() {
+        // Definieer je spelers
+        PylosPlayerType mm3_1 = new PylosPlayerType("MM_4_1") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerMiniMax(4);
+            }
+        };
+
+        PylosPlayerType mm3_2 = new PylosPlayerType("MM_4_2") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerMiniMax(4);
+            }
+        };
+
+
+        PylosPlayerType mm4_1 = new PylosPlayerType("BestFit") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerBestFit();
+            }
+        };
+
+        // Als je er later nog wil bijsteken, gewoon hier toevoegen
+        List<PylosPlayerType> players = Arrays.asList(mm3_1, mm3_2, mm4_1);
+
+        int gamesPerMatchup = 2000;   // of 10000, wat jij wil
+        int threads = 8;
+        boolean recordGames = true;
+
+        List<BattleResult> results = new ArrayList<>();
+
+        // Laat elke speler tegen elke andere spelen
+        for (int i = 0; i < players.size(); i++) {
+            for (int j = i; j < players.size(); j++) { // i<j voor alleen verschillende; i<=j voor ook mirror/self
+                PylosPlayerType p1 = players.get(i);
+                PylosPlayerType p2 = players.get(j);
+
+                System.out.println("Starting battle: " + p1.toString() + " vs " + p2.toString());
+
+                BattleResult br = BattleMT.play(p1, p2, gamesPerMatchup, threads, recordGames);
+                results.add(br);
+
+                System.out.println("Finished battle: " + p1.toString() + " vs " + p2.toString() +
+                        " -> games: " + br.playedGames.size());
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Schrijft een lijst van PlayedGame naar één JSON-bestand.
+     */
+    private static void exportGames(List<PlayedGame> games, String exportPath) throws IOException {
+        File file = new File(exportPath);
+        Files.createDirectories(file.getParentFile().toPath());
+
+        try (FileWriter writer = new FileWriter(file)) {
+            Gson gson = new GsonBuilder().create();
+            gson.toJson(games, writer);
+        }
+
+        System.out.println("Exported to: " + exportPath);
+    }
+}
+
+/*
     public static List<PlayedGame> collectGames() {
         SavedModelBundle model = SavedModelBundle.load(MODEL_PATH, "serve");
         PylosPlayerType p1 = new PylosPlayerType("PML_1") {
@@ -60,26 +128,7 @@ public class PylosMLCollect {
 
         return br.playedGames;
     }
+    */
 
-//    public static List<PlayedGame> collectGames() {
-//        SavedModelBundle model = SavedModelBundle.load(MODEL_PATH, "serve");
-//        PylosPlayerType p1 = new PylosPlayerType("MM_1") {
-//            @Override
-//            public PylosPlayer create() {
-//                return new PylosPlayerMiniMax(3);
-//            }
-//        };
-//        PylosPlayerType p2 = new PylosPlayerType("MM3_2") {
-//            @Override
-//            public PylosPlayer create() {
-//                return new PylosPlayerMiniMax(3);
-//            }
-//        };
-
-//        BattleResult br = BattleMT.play(p1, p2, 10000, 8, true);
-//
-//        return br.playedGames;
-//    }
-}
 
 
