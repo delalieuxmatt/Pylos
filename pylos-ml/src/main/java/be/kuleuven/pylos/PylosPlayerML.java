@@ -8,7 +8,9 @@ import org.tensorflow.ndarray.StdArrays;
 import org.tensorflow.types.TFloat32;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PylosPlayerML extends PylosPlayer {
 
@@ -19,10 +21,14 @@ public class PylosPlayerML extends PylosPlayer {
      * 3-4 is a good starting point.
      * Your original code was equivalent to SEARCH_DEPTH = 1.
      */
-    private static final int SEARCH_DEPTH = 3;
+    private static final int SEARCH_DEPTH = 4;
+
+    private Map<Long, Float> transpositionTable;
+
 
     public PylosPlayerML(SavedModelBundle model) {
         this.model = model;
+        this.transpositionTable = new HashMap<>();
     }
 
     /**
@@ -64,7 +70,9 @@ public class PylosPlayerML extends PylosPlayer {
      * @return The best Action
      */
     private Action findBestAction(PylosBoard board, PylosPlayerColor color, PylosGameState state, int depth) {
-        List<Action> actions = generateActions(board, color, state);
+        this.transpositionTable.clear();
+        List<Action> actionList = new ArrayList<>();
+        List<Action> actions = generateActions(board, color, state, actionList);
         PylosGameSimulator simulator = new PylosGameSimulator(state, color, board);
 
         Action bestAction = null;
@@ -75,7 +83,7 @@ public class PylosPlayerML extends PylosPlayer {
 
             // Call the recursive negamax function for the *opponent*
             // The score returned is from the opponent's perspective, so we negate it.
-            float eval = -negamax(board, simulator.getColor(), simulator.getState(), depth - 1);
+            float eval = -negamax(board, simulator.getColor(), simulator.getState(), depth - 1, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
 
             action.reverseSimulate(simulator);
 
@@ -104,10 +112,14 @@ public class PylosPlayerML extends PylosPlayer {
      * @param depth   The remaining depth to search
      * @return The score of this board from the perspective of the *current* player (color)
      */
-    private float negamax(PylosBoard board, PylosPlayerColor color, PylosGameState state, int depth) {
+    private float negamax(PylosBoard board, PylosPlayerColor color, PylosGameState state, int depth, float alpha, float beta) {
 
         // Base Case 1: Terminal Node (Game is over)
         // Check if the game is completed
+        long boardKey = board.toLong();
+        if (transpositionTable.containsKey(boardKey)) {
+            return transpositionTable.get(boardKey);
+        }
         if (state == PylosGameState.COMPLETED) {
             // 'state' is COMPLETED, which means the *previous* move was a winning move.
             // The player whose turn it is now ('color') has lost.
@@ -126,11 +138,12 @@ public class PylosPlayerML extends PylosPlayer {
         // ... (rest of the function is correct) ...
         if (depth == 0) {
             // evalBoard is always called from the perspective of the root player
-            return evalBoard(board, this.PLAYER_COLOR);
+            return evalBoard(board, color);
         }
 
         // --- Recursive Step ---
-        List<Action> actions = generateActions(board, color, state);
+        List<Action> actionList = new ArrayList<>();
+        List<Action> actions = generateActions(board, color, state, actionList);
         PylosGameSimulator simulator = new PylosGameSimulator(state, color, board);
 
         // If no actions are possible (e.g., in a completed state that somehow got here)
@@ -138,7 +151,7 @@ public class PylosPlayerML extends PylosPlayer {
             // Re-evaluate the board. This can happen if the terminal state
             // was not caught by the depth == 0 or state == COMPLETED checks
             // (e.g., a board with no moves, but not technically 'COMPLETED' yet).
-            return evalBoard(board, this.PLAYER_COLOR);
+            return evalBoard(board, color);
         }
 
         float bestScore = Float.NEGATIVE_INFINITY;
@@ -148,13 +161,17 @@ public class PylosPlayerML extends PylosPlayer {
 
             // Recursive call for the *next* player
             // The score returned is from *their* perspective, so we negate it
-            float score = -negamax(board, simulator.getColor(), simulator.getState(), depth - 1);
+            float score = -negamax(board, simulator.getColor(), simulator.getState(), depth - 1, -beta, -alpha);
 
             action.reverseSimulate(simulator);
-
             bestScore = Math.max(bestScore, score);
+            alpha = Math.max(alpha, score);
+            if (alpha >= beta) {
+                break; // Beta cutoff
+            }
         }
 
+        transpositionTable.put(boardKey, bestScore);
         return bestScore;
     }
 
@@ -194,11 +211,12 @@ public class PylosPlayerML extends PylosPlayer {
         };
     }
 
+
     /**
      * UNCHANGED: Helper method to generate all possible actions
      */
-    private static List<Action> generateActions(PylosBoard board, PylosPlayerColor color, PylosGameState state) {
-        List<Action> actions = new ArrayList<>();
+    private static List<Action> generateActions(PylosBoard board, PylosPlayerColor color, PylosGameState state, List<Action> actionList) {
+        actionList.clear();
         PylosSphere[] spheres = board.getSpheres(color);
 
         switch (state) {
@@ -216,27 +234,27 @@ public class PylosPlayerML extends PylosPlayer {
                     if (!sphere.isReserve())
                         for (PylosLocation location : availableFullSquaresTopLocations)
                             if (sphere.canMoveTo(location) && sphere.getLocation() != location)
-                                actions.add(new Action(ActionType.MOVE, sphere, location));
+                                actionList.add(new Action(ActionType.MOVE, sphere, location));
 
                 // Add actions for moving a reserve sphere to a free location
                 for (PylosLocation location : locations)
                     if (location.isUsable())
-                        actions.add(new Action(ActionType.ADD, board.getReserve(color), location));
+                        actionList.add(new Action(ActionType.ADD, board.getReserve(color), location));
             }
             case REMOVE_FIRST -> {
                 for (PylosSphere sphere : spheres)
                     if (sphere.canRemove())
-                        actions.add(new Action(ActionType.REMOVE_FIRST, sphere, null));
+                        actionList.add(new Action(ActionType.REMOVE_FIRST, sphere, null));
             }
             case REMOVE_SECOND -> {
-                actions.add(new Action(ActionType.PASS, null, null));
+                actionList.add(new Action(ActionType.PASS, null, null));
                 for (PylosSphere sphere : spheres)
                     if (sphere.canRemove())
-                        actions.add(new Action(ActionType.REMOVE_SECOND, sphere, null));
+                        actionList.add(new Action(ActionType.REMOVE_SECOND, sphere, null));
             }
         }
 
-        return actions;
+        return actionList;
     }
 
 
@@ -321,3 +339,4 @@ public class PylosPlayerML extends PylosPlayer {
         }
     }
 }
+

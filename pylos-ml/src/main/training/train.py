@@ -5,13 +5,14 @@ import numpy as np
 import datetime
 import os
 
-DATASET_PATH = "resources/games/0.json"
+DATASET_PATH = "resources/games/all_battles.json"
 MODEL_EXPORT_PATH = "resources/models/"
 SELECTED_PLAYERS = []
 DISCOUNT_FACTOR = 0.98
-EPOCHS = 10
-BATCH_SIZE = 1024
+EPOCHS = 20
+BATCH_SIZE = 512
 N_CORES = 8
+LEARNING_RATE = 0.001
 
 os.environ["OMP_NUM_THREADS"] = str(N_CORES)
 os.environ["TF_NUM_INTRAOP_THREADS"] = str(N_CORES)
@@ -22,40 +23,92 @@ def main():
 
     model = build_model()
 
-    model.compile(optimizer='adam', loss='mean_squared_error')
+    # Use learning rate schedule for better convergence
+    optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
+    model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mae'])
 
     boards, scores = build_dataset(DATASET_PATH)
 
-    print("# datapoints:", len(boards))
+    print(f"# datapoints: {len(boards)}")
+    print(f"Score range: [{scores.min():.2f}, {scores.max():.2f}]")
+    print(f"Score mean: {scores.mean():.2f}, std: {scores.std():.2f}")
 
-    #print the dataset
-    print("boards:", boards)
-    print("scores:", scores)
+    # Add early stopping and model checkpointing
+    callbacks = [
+        tf.keras.callbacks.EarlyStopping(
+            monitor='val_loss',
+            patience=5,
+            restore_best_weights=True
+        ),
+        tf.keras.callbacks.ReduceLROnPlateau(
+            monitor='val_loss',
+            factor=0.5,
+            patience=3,
+            min_lr=1e-6
+        )
+    ]
 
-    model.fit(boards, scores, epochs=EPOCHS, batch_size=BATCH_SIZE, validation_split=0.2)
+    history = model.fit(
+        boards, scores,
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        validation_split=0.2,
+        callbacks=callbacks,
+        verbose=1
+    )
 
     # Save the model as SavedModel, with date and time as the name
-    model.export(MODEL_EXPORT_PATH + datetime.datetime.now().strftime("%Y%m%d-%H%M"))
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M")
+    model.export(MODEL_EXPORT_PATH + timestamp)
     model.export(MODEL_EXPORT_PATH + "latest")
 
+    print(f"\nModel saved to {MODEL_EXPORT_PATH}")
+    print(f"Final validation loss: {history.history['val_loss'][-1]:.4f}")
+
 def build_model():
-    # The input should be a 1D array of 60 floats (-1, 0, 1)
+    """
+    Improved model architecture with:
+    - Deeper network
+    - Batch normalization
+    - Dropout for regularization
+    """
     inputs = layers.Input(shape=(60,), dtype=tf.float32)
 
-    # 3 dense layers
-    x = layers.Dense(128, activation='relu')(inputs)
+    # First block
+    x = layers.Dense(256, activation='relu')(inputs)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.3)(x)
+
+    # Second block
+    x = layers.Dense(128, activation='relu')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.3)(x)
+
+    # Third block
     x = layers.Dense(64, activation='relu')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.2)(x)
+
+    # Fourth block
     x = layers.Dense(32, activation='relu')(x)
+    x = layers.BatchNormalization()(x)
 
     # Output layer for regression (predict a single float value)
     outputs = layers.Dense(1)(x)
 
-    # Build the model
     model = models.Model(inputs=inputs, outputs=outputs)
     return model
 
 def build_dataset(path):
-    # Load and prepare the dataset of Pylos Games from the JSON file in the data folder
+    """
+    CRITICAL FIX: Generate training data from BOTH players' perspectives.
+
+    The key insight: In a two-player zero-sum game, we need to train the model
+    to evaluate positions from a consistent perspective. We do this by:
+    1. For each board position, create TWO training examples
+    2. One from Light's perspective (original board, positive if Light wins)
+    3. One from Dark's perspective (inverted board, positive if Dark wins)
+    """
     with open(path) as f:
         data = json.load(f)
 
@@ -65,25 +118,50 @@ def build_dataset(path):
     scores = []
 
     for game_idx, game in enumerate(data):
-        # Skip games that don't have both players in the selected players list, if it's not empty
-        if SELECTED_PLAYERS and (game["lightPlayer"] not in SELECTED_PLAYERS or game["darkPlayer"] not in SELECTED_PLAYERS):
+        # Skip games that don't have both players in the selected players list
+        if SELECTED_PLAYERS and (
+                game["lightPlayer"] not in SELECTED_PLAYERS or
+                game["darkPlayer"] not in SELECTED_PLAYERS
+        ):
             continue
 
-        winner = game["winner"]
+        winner = game["winner"]  # 1 for Light, -1 for Dark
         n_moves = len(game["boardHistory"])
+        reserve_size = game['reserveSize']
 
         for i, board_as_long in enumerate(game["boardHistory"]):
-            # Convert 64-bit integer to a binary string with 60 bits
-            board_as_array = np.array([(board_as_long >> j) & 1 for j in range(60 - 1, -1, -1)], dtype=np.float32)
-            discounted_score = winner * (DISCOUNT_FACTOR ** (n_moves - i))
+            # Convert board to array (0 = Light, 1 = Dark)
+            board_as_array = np.array(
+                [(board_as_long >> j) & 1 for j in range(59, -1, -1)],
+                dtype=np.float32
+            )
 
+            # Calculate discount based on proximity to end of game
+            # Positions closer to the end are more certain
+            discount = DISCOUNT_FACTOR ** (n_moves - i - 1)
+
+            # Light's perspective: positive if Light wins
+            light_score = winner * discount * reserve_size
             boards.append(board_as_array)
-            scores.append(discounted_score)
+            scores.append(light_score)
+
+            # Dark's perspective: flip the board (0->1, 1->0) and score
+            # This teaches the model to evaluate from the active player's view
+            dark_board = 1.0 - board_as_array
+            dark_score = -winner * discount * reserve_size  # Flip the score
+            boards.append(dark_board)
+            scores.append(dark_score)
 
         if game_idx % 1000 == 0:
             print(f"Processed game {game_idx}/{len(data)}")
 
-    return np.array(boards, dtype=np.float32), np.array(scores, dtype=np.float32)
+    boards_array = np.array(boards, dtype=np.float32)
+    scores_array = np.array(scores, dtype=np.float32)
+
+    # Shuffle the dataset to mix Light and Dark perspectives
+    indices = np.random.permutation(len(boards_array))
+
+    return boards_array[indices], scores_array[indices]
 
 
 if __name__ == "__main__":

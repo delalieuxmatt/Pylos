@@ -29,14 +29,14 @@ public class PylosMLTest {
                 }
             };
 
-            PylosPlayerType opp = new PylosPlayerType("MM2") {
+            PylosPlayerType opp = new PylosPlayerType("MM4") {
                 @Override
                 public PylosPlayer create() {
-                    return new PylosPlayerMiniMax(2);
+                    return new PylosPlayerMiniMax(4);
                 }
             };
 
-            BattleMT.play(trainedPlayer, opp, 1000, 8);
+            BattleMT.play(trainedPlayer, opp, 100, 8);
         }
     }
 

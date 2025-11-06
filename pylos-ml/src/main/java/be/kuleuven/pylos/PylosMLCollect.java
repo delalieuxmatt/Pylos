@@ -3,6 +3,7 @@ package be.kuleuven.pylos;
 import be.kuleuven.pylos.battle.BattleMT;
 import be.kuleuven.pylos.battle.BattleResult;
 import be.kuleuven.pylos.battle.data.PlayedGame;
+import be.kuleuven.pylos.game.PylosBoard;
 import be.kuleuven.pylos.player.PylosPlayer;
 import be.kuleuven.pylos.player.PylosPlayerType;
 import be.kuleuven.pylos.player.codes.PylosPlayerBestFit;
@@ -12,11 +13,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class PylosMLCollect {
 
-    public static final String EXPORT_PATH = "games/all_battles.json";
+    public static final String EXPORT_PATH = Paths.get("pylos-ml", "src", "main", "training", "resources", "games", "all_battles.json").toString();
+
 
     public static void main(String[] args) throws IOException {
         // 1) run alle battles en verzamel BattleResults
@@ -57,17 +60,54 @@ public class PylosMLCollect {
         };
 
 
-        PylosPlayerType mm4_1 = new PylosPlayerType("BestFit") {
+        PylosPlayerType mm4_1 = new PylosPlayerType("mm4_1") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerBestFit();
+                return new PylosPlayerMiniMax(4);
             }
         };
 
-        // Als je er later nog wil bijsteken, gewoon hier toevoegen
-        List<PylosPlayerType> players = Arrays.asList(mm3_1, mm3_2, mm4_1);
+        PylosPlayerType mm4_2 = new PylosPlayerType("mm4_2") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerMiniMax(4);
+            }
+        };
 
-        int gamesPerMatchup = 2000;   // of 10000, wat jij wil
+        PylosPlayerType mm2_1 = new PylosPlayerType("mm2_1") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerMiniMax(2);
+            }
+        };
+
+        PylosPlayerType mm5_1 = new PylosPlayerType("mm5_1") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerMiniMax(5);
+            }
+        };
+
+        PylosPlayerType mm5_2 = new PylosPlayerType("mm5_2") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerMiniMax(5);
+            }
+        };
+
+        PylosPlayerType mm6 = new PylosPlayerType("mm6") {
+            @Override
+            public PylosPlayer create() {
+                return new PylosPlayerMiniMax(6);
+            }
+        };
+
+
+
+        // Als je er later nog wil bijsteken, gewoon hier toevoegen
+        List<PylosPlayerType> players = Arrays.asList(mm3_1, mm3_2, mm4_1, mm4_2, mm2_1, mm5_1, mm5_2, mm6);
+
+        int gamesPerMatchup = 3000;   // of 10000, wat jij wil
         int threads = 8;
         boolean recordGames = true;
 
