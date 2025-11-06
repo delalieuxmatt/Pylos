@@ -8,12 +8,14 @@ import java.util.List;
 public class PlayedGame {
     public final String lightPlayer;
     public final String darkPlayer;
+    public final int reserveSize;
+
 
     public final List<Long> boardHistory;
 
     public final int winner;
 
-    public PlayedGame(List<Long> boardHistory, PylosPlayerType light, PylosPlayerType dark, PylosPlayerColor winner) {
+    public PlayedGame(List<Long> boardHistory, PylosPlayerType light, PylosPlayerType dark, PylosPlayerColor winner, int reserveSize) {
         this.boardHistory = boardHistory;
         this.lightPlayer = light.toString();
         this.darkPlayer = dark.toString();
@@ -22,5 +24,6 @@ public class PlayedGame {
             case PylosPlayerColor.DARK -> -1;
             case null -> 0;
         };
+        this.reserveSize = reserveSize;
     }
 }

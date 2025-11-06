@@ -43,14 +43,14 @@ public class Battle {
             try{
                 game.play();
                 if (game.getState() == PylosGameState.DRAW) {
-                    playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, null));
+                    playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, null, 0));
                     p1StartDraw++;
                 } else {
                     if (game.getWinner() == p1) {
-                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, PylosPlayerColor.LIGHT));
+                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, PylosPlayerColor.LIGHT, game.getReserveSizeOfWinner()));
                         p1StartP1Win++;
                     } else {
-                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, PylosPlayerColor.DARK));
+                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, PylosPlayerColor.DARK, game.getReserveSizeOfWinner()));
                         p1StartP2Win++;
                     }
                 }
@@ -81,14 +81,14 @@ public class Battle {
             try {
                 game.play();
                 if (game.getState() == PylosGameState.DRAW) {
-                    playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, null));
+                    playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, null, 0));
                     p2StartDraw++;
                 } else {
                     if (game.getWinner() == p1) {
-                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, PylosPlayerColor.DARK));
+                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, PylosPlayerColor.DARK, game.getReserveSizeOfWinner()));
                         p2StartP1Win++;
                     } else {
-                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, PylosPlayerColor.LIGHT));
+                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, PylosPlayerColor.LIGHT, game.getReserveSizeOfWinner()));
                         p2StartP2Win++;
                     }
                 }
