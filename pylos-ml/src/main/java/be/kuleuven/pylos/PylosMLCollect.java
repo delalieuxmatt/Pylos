@@ -8,6 +8,7 @@ import be.kuleuven.pylos.player.PylosPlayer;
 import be.kuleuven.pylos.player.PylosPlayerType;
 import be.kuleuven.pylos.player.codes.PylosPlayerBestFit;
 import be.kuleuven.pylos.player.codes.PylosPlayerMiniMax;
+import be.kuleuven.pylos.player.student.*;
 import com.google.gson.*;
 import java.io.File;
 import java.io.FileWriter;
@@ -45,39 +46,17 @@ public class PylosMLCollect {
      */
     public static List<BattleResult> runAllBattles() {
         // Definieer je spelers
-        PylosPlayerType mm3_1 = new PylosPlayerType("MM_4_1") {
+        PylosPlayerType mm3_1 = new PylosPlayerType("MM_3_1") {
             @Override
             public PylosPlayer create() {
-                return new PylosPlayerMiniMax(4);
+                return new PylosPlayerMiniMax(3);
             }
         };
-
-        PylosPlayerType mm3_2 = new PylosPlayerType("MM_4_2") {
-            @Override
-            public PylosPlayer create() {
-                return new PylosPlayerMiniMax(4);
-            }
-        };
-
 
         PylosPlayerType mm4_1 = new PylosPlayerType("mm4_1") {
             @Override
             public PylosPlayer create() {
                 return new PylosPlayerMiniMax(4);
-            }
-        };
-
-        PylosPlayerType mm4_2 = new PylosPlayerType("mm4_2") {
-            @Override
-            public PylosPlayer create() {
-                return new PylosPlayerMiniMax(4);
-            }
-        };
-
-        PylosPlayerType mm2_1 = new PylosPlayerType("mm2_1") {
-            @Override
-            public PylosPlayer create() {
-                return new PylosPlayerMiniMax(2);
             }
         };
 
@@ -102,12 +81,45 @@ public class PylosMLCollect {
             }
         };
 
+        PylosPlayerType Tano = new PylosPlayerType("Tano") {
+            @Override
+            public PylosPlayer create() {
+                return new StudentPlayerTano();
+            }
+        };
+        PylosPlayerType Radi = new PylosPlayerType("radi") {
+            @Override
+            public PylosPlayer create() {
+                return new StudentPlayerRadi();
+            }
+        };
+        PylosPlayerType Wannes = new PylosPlayerType("wannes") {
+            @Override
+            public PylosPlayer create() {
+                return new StudentWannes();
+            }
+        };
+        PylosPlayerType codexWannes = new PylosPlayerType("codexWannes") {
+            @Override
+            public PylosPlayer create() {
+                return new StudentCodex();
+            }
+        };
+
+        PylosPlayerType ons = new PylosPlayerType("onze") {
+            @Override
+            public PylosPlayer create() {
+                return new StudentPlayer();
+            }
+        };
+
+
 
 
         // Als je er later nog wil bijsteken, gewoon hier toevoegen
-        List<PylosPlayerType> players = Arrays.asList(mm3_1, mm3_2, mm4_1, mm4_2, mm2_1, mm5_1, mm5_2, mm6);
+        List<PylosPlayerType> players = Arrays.asList(mm3_1, mm4_1, mm5_1,mm5_2, mm6 , Tano, Radi, Wannes, codexWannes, ons);
 
-        int gamesPerMatchup = 3000;   // of 10000, wat jij wil
+        int gamesPerMatchup = 3000;
         int threads = 8;
         boolean recordGames = true;
 
