@@ -16,11 +16,6 @@ public class PylosPlayerML extends PylosPlayer {
 
     private final SavedModelBundle model;
 
-    /**
-     * NEW: Set the search depth for the MiniMax algorithm.
-     * 3-4 is a good starting point.
-     * Your original code was equivalent to SEARCH_DEPTH = 1.
-     */
     private static final int SEARCH_DEPTH = 4;
 
     private Map<Long, Float> transpositionTable;

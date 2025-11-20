@@ -117,9 +117,9 @@ public class PylosMLCollect {
 
 
         // Als je er later nog wil bijsteken, gewoon hier toevoegen
-        List<PylosPlayerType> players = Arrays.asList(mm3_1, mm4_1, mm5_1,mm5_2, mm6 , Tano, Radi, Wannes, codexWannes, ons);
+        List<PylosPlayerType> players = Arrays.asList( mm4_1, mm5_1, mm6);
 
-        int gamesPerMatchup = 3000;
+        int gamesPerMatchup = 5000;
         int threads = 8;
         boolean recordGames = true;
 

@@ -128,6 +128,7 @@ def build_dataset(path):
         winner = game["winner"]  # 1 for Light, -1 for Dark
         n_moves = len(game["boardHistory"])
         reserve_size = game['reserveSize']
+        sqComp = game['sqComp']
 
         for i, board_as_long in enumerate(game["boardHistory"]):
             # Convert board to array (0 = Light, 1 = Dark)
@@ -141,14 +142,14 @@ def build_dataset(path):
             discount = DISCOUNT_FACTOR ** (n_moves - i - 1)
 
             # Light's perspective: positive if Light wins
-            light_score = winner * discount * reserve_size
+            light_score = winner * discount * (4*reserve_size + sqComp)
             boards.append(board_as_array)
             scores.append(light_score)
 
             # Dark's perspective: flip the board (0->1, 1->0) and score
             # This teaches the model to evaluate from the active player's view
             dark_board = 1.0 - board_as_array
-            dark_score = -winner * discount * reserve_size  # Flip the score
+            dark_score = -winner * discount * (4*reserve_size + sqComp)  # Flip the score
             boards.append(dark_board)
             scores.append(dark_score)
 

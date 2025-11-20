@@ -75,7 +75,7 @@ def build_model():
     inputs = layers.Input(shape=(60,), dtype=tf.float32)
 
     # Third block
-    x = layers.Dense(64, activation='relu')(x)
+    x = layers.Dense(64, activation='relu')(inputs)
     x = layers.BatchNormalization()(x)
     x = layers.Dropout(0.2)(x)
 

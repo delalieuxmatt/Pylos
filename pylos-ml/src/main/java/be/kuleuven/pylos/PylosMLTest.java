@@ -4,6 +4,7 @@ import be.kuleuven.pylos.battle.BattleMT;
 import be.kuleuven.pylos.player.PylosPlayer;
 import be.kuleuven.pylos.player.PylosPlayerType;
 import be.kuleuven.pylos.player.codes.PylosPlayerMiniMax;
+import be.kuleuven.pylos.player.student.StudentPlayer;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.proto.MetaGraphDef;
 import org.tensorflow.proto.SignatureDef;
@@ -29,10 +30,10 @@ public class PylosMLTest {
                 }
             };
 
-            PylosPlayerType opp = new PylosPlayerType("MM4") {
+            PylosPlayerType opp = new PylosPlayerType("Student Player") {
                 @Override
                 public PylosPlayer create() {
-                    return new PylosPlayerMiniMax(4);
+                    return new PylosPlayerMiniMax(10);
                 }
             };
 

@@ -9,13 +9,15 @@ public class PlayedGame {
     public final String lightPlayer;
     public final String darkPlayer;
     public final int reserveSize;
+    public final int sqComp;
+
 
 
     public final List<Long> boardHistory;
 
     public final int winner;
 
-    public PlayedGame(List<Long> boardHistory, PylosPlayerType light, PylosPlayerType dark, PylosPlayerColor winner, int reserveSize) {
+    public PlayedGame(List<Long> boardHistory, PylosPlayerType light, PylosPlayerType dark, PylosPlayerColor winner, int reserveSize, int sqComp) {
         this.boardHistory = boardHistory;
         this.lightPlayer = light.toString();
         this.darkPlayer = dark.toString();
@@ -25,5 +27,6 @@ public class PlayedGame {
             case null -> 0;
         };
         this.reserveSize = reserveSize;
+        this.sqComp = sqComp;
     }
 }

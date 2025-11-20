@@ -32,6 +32,9 @@ public class PylosGame implements PylosGameIF {
 
     private List<Long> boardHistory;
 
+    private int lightSquaresCompleted = 0;
+    private int darkSquaresCompleted = 0;
+
     /* constructor ------------------------------------------------------------------------------------------------ */
 
 //	public PylosGame(PylosBoard board, PylosPlayer playerLight, PylosPlayer playerDark) {
@@ -106,6 +109,13 @@ public class PylosGame implements PylosGameIF {
 
         if (!isDrawState()) {
             if (completedSquare) {
+
+                if (currentPlayer.PLAYER_COLOR == PylosPlayerColor.LIGHT) {
+                    lightSquaresCompleted++;
+                } else {
+                    darkSquaresCompleted++;
+                }
+
                 setState(PylosGameState.REMOVE_FIRST);
             } else {
                 if (!checkFinishedAfterMove()) {
@@ -133,6 +143,14 @@ public class PylosGame implements PylosGameIF {
                 setState(PylosGameState.MOVE);
                 switchPlayer();
             }
+        }
+    }
+
+    public int getSquaresCompleted(PylosPlayerColor color) {
+        if (color == PylosPlayerColor.LIGHT) {
+            return lightSquaresCompleted;
+        } else {
+            return darkSquaresCompleted;
         }
     }
 

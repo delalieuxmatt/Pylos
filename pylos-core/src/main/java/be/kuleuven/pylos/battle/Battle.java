@@ -43,14 +43,16 @@ public class Battle {
             try{
                 game.play();
                 if (game.getState() == PylosGameState.DRAW) {
-                    playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, null, 0));
+                    playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, null, 0, 0));
                     p1StartDraw++;
                 } else {
                     if (game.getWinner() == p1) {
-                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, PylosPlayerColor.LIGHT, game.getReserveSizeOfWinner()));
+                        int sqComp = game.getSquaresCompleted(PylosPlayerColor.LIGHT) - game.getSquaresCompleted(PylosPlayerColor.DARK);
+                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, PylosPlayerColor.LIGHT, game.getReserveSizeOfWinner(), sqComp));
                         p1StartP1Win++;
                     } else {
-                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, PylosPlayerColor.DARK, game.getReserveSizeOfWinner()));
+                        int sqComp = game.getSquaresCompleted(PylosPlayerColor.DARK) - game.getSquaresCompleted(PylosPlayerColor.LIGHT);
+                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt1, ppt2, PylosPlayerColor.DARK, game.getReserveSizeOfWinner(), sqComp));
                         p1StartP2Win++;
                     }
                 }
@@ -81,14 +83,16 @@ public class Battle {
             try {
                 game.play();
                 if (game.getState() == PylosGameState.DRAW) {
-                    playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, null, 0));
+                    playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, null, 0, 0));
                     p2StartDraw++;
                 } else {
                     if (game.getWinner() == p1) {
-                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, PylosPlayerColor.DARK, game.getReserveSizeOfWinner()));
+                        int sqComp = game.getSquaresCompleted(PylosPlayerColor.LIGHT) - game.getSquaresCompleted(PylosPlayerColor.DARK);
+                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, PylosPlayerColor.DARK, game.getReserveSizeOfWinner(), sqComp));
                         p2StartP1Win++;
                     } else {
-                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, PylosPlayerColor.LIGHT, game.getReserveSizeOfWinner()));
+                        int sqComp = game.getSquaresCompleted(PylosPlayerColor.DARK) - game.getSquaresCompleted(PylosPlayerColor.LIGHT);
+                        playedGames.add(new PlayedGame(game.getBoardHistory(), ppt2, ppt1, PylosPlayerColor.LIGHT, game.getReserveSizeOfWinner(), sqComp));
                         p2StartP2Win++;
                     }
                 }
