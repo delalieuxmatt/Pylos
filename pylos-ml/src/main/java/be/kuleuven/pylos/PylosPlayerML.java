@@ -93,19 +93,18 @@ public class PylosPlayerML extends PylosPlayer {
 
     /**
      * Evaluates the board using the TensorFlow model.
-     * NEW INPUT SIZE: 38 features
+     * NEW INPUT SIZE: 37 features
      */
     private float evalBoard(PylosBoard board, PylosPlayerColor color) {
         long boardAsLong = board.toLong();
 
-        // Input Size: 38
+        // Input Size: 37
         // 0-29: Board Locations
         // 30: My Reserve (normalized)
         // 31: Enemy Reserve (normalized)
         // 32: Reserve Difference
-        // 33: Material Difference
-        // 34-37: Layer Scores (Z0, Z1, Z2, Z3)
-        float[] inputs = new float[38];
+        // 33-36: Layer Scores (Z0, Z1, Z2, Z3)
+        float[] inputs = new float[37];
 
         int lightCount = 0;
         int darkCount = 0;
@@ -139,33 +138,30 @@ public class PylosPlayerML extends PylosPlayer {
             myReserves = lightReserves / 15.0f;
             enemyReserves = darkReserves / 15.0f;
             reserveDiff = (lightReserves - darkReserves) / 15.0f;
-            materialDiff = (lightCount - darkCount) / 30.0f;
         } else {
             myReserves = darkReserves / 15.0f;
             enemyReserves = lightReserves / 15.0f;
             reserveDiff = (darkReserves - lightReserves) / 15.0f;
-            materialDiff = (darkCount - lightCount) / 30.0f;
         }
 
         inputs[30] = myReserves;
         inputs[31] = enemyReserves;
         inputs[32] = reserveDiff;
-        inputs[33] = materialDiff;
 
         // --- 3. CALCULATE LAYER SCORES (Indices 34-37) ---
         float sumZ0 = 0;
         for(int i=0; i<=15; i++) sumZ0 += inputs[i];
-        inputs[34] = sumZ0 / 16.0f;
+        inputs[33] = sumZ0 / 16.0f;
 
         float sumZ1 = 0;
         for(int i=16; i<=24; i++) sumZ1 += inputs[i];
-        inputs[35] = sumZ1 / 9.0f;
+        inputs[34] = sumZ1 / 9.0f;
 
         float sumZ2 = 0;
         for(int i=25; i<=28; i++) sumZ2 += inputs[i];
-        inputs[36] = sumZ2 / 4.0f;
+        inputs[35] = sumZ2 / 4.0f;
 
-        inputs[37] = inputs[29];
+        inputs[36] = inputs[29];
 
         // --- 4. RUN INFERENCE ---
         float output = Float.NaN;

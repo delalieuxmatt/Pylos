@@ -139,7 +139,7 @@ def build_model():
     """
     Deep Residual Network for 160k games dataset
     """
-    inputs = layers.Input(shape=(38,), dtype=tf.float32)
+    inputs = layers.Input(shape=(37,), dtype=tf.float32)
 
     # Initial expansion
     x = layers.Dense(512, kernel_initializer='he_normal')(inputs)
@@ -241,7 +241,6 @@ def build_dataset(path):
             light_reserves_norm = light_reserves / 15.0
             dark_reserves_norm = dark_reserves / 15.0
             reserve_diff = (light_reserves - dark_reserves) / 15.0
-            material_diff = (light_count - dark_count) / 30.0
 
             z0_val = np.sum(board_arr[0:16]) / 16.0
             z1_val = np.sum(board_arr[16:25]) / 9.0
@@ -253,7 +252,7 @@ def build_dataset(path):
             # LIGHT PERSPECTIVE
             light_input = np.concatenate([
                 board_arr,
-                [light_reserves_norm, dark_reserves_norm, reserve_diff, material_diff],
+                [light_reserves_norm, dark_reserves_norm, reserve_diff],
                 layer_features
             ])
             inputs_list.append(light_input)
@@ -269,7 +268,7 @@ def build_dataset(path):
 
             dark_input = np.concatenate([
                 dark_board_arr,
-                [dark_reserves_norm, light_reserves_norm, -reserve_diff, -material_diff],
+                [dark_reserves_norm, light_reserves_norm, -reserve_diff],
                 dark_layer_features
             ])
             inputs_list.append(dark_input)
