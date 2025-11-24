@@ -10,18 +10,17 @@ import org.tensorflow.types.TFloat32;
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class PylosPlayerML extends PylosPlayer {
+public class PylosPlayerML2 extends PylosPlayer {
 
     private final SavedModelBundle model;
-    private static final int SEARCH_DEPTH = 2;
 
-    public PylosPlayerML(SavedModelBundle model) {
+    public PylosPlayerML2(SavedModelBundle model) {
         this.model = model;
     }
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
+        // Just find the best immediate move according to the Neural Net
         Action bestAction = findBestAction(board, this.PLAYER_COLOR, PylosGameState.MOVE);
         bestAction.execute(game);
     }
@@ -38,138 +37,76 @@ public class PylosPlayerML extends PylosPlayer {
         bestAction.execute(game);
     }
 
+    /**
+     * PURE ML SEARCH STRATEGY:
+     * 1. Generate all legal moves.
+     * 2. Simulate each move to see the resulting board.
+     * 3. Ask the Neural Network: "How good is this board for ME?"
+     * 4. Pick the move with the highest score.
+     */
     private Action findBestAction(PylosBoard board, PylosPlayerColor color, PylosGameState state) {
-        List<Action> actions = new ArrayList<>();
-        generateActions(board, color, state, actions);
-
-        float bestScore = Float.NEGATIVE_INFINITY;
-        Action bestAction = null;
-
+        List<Action> actionList = new ArrayList<>();
+        List<Action> actions = generateActions(board, color, state, actionList);
         PylosGameSimulator simulator = new PylosGameSimulator(state, color, board);
 
+        Action bestAction = null;
+        float bestEval = Float.NEGATIVE_INFINITY;
+
         for (Action action : actions) {
+            // 1. Simulate the move
             action.simulate(simulator);
-            float score = -negamax(board, simulator.getColor(), simulator.getState(), SEARCH_DEPTH - 1, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+
+            // 2. Evaluate the board AFTER the move.
+            // We ask: "What is the value of this board for ME (this.PLAYER_COLOR)?"
+            float eval = evalBoard(board, this.PLAYER_COLOR);
+
+            // 3. Undo the simulation
             action.reverseSimulate(simulator);
 
-            if (score > bestScore) {
-                bestScore = score;
+            // 4. Maximize the score
+            if (eval > bestEval) {
+                bestEval = eval;
                 bestAction = action;
             }
         }
 
-        if (bestAction == null && !actions.isEmpty()) return actions.get(0);
+        // Fallback if list is empty or errors occur
+        if (bestAction == null && !actions.isEmpty()) {
+            return actions.get(0);
+        }
+
         return bestAction;
-    }
-
-    private float negamax(PylosBoard board, PylosPlayerColor color, PylosGameState state, int depth, float alpha, float beta) {
-        if (state == PylosGameState.COMPLETED) {
-            return Float.NEGATIVE_INFINITY;
-        }
-
-        if (depth == 0) {
-            return evalBoard(board, color);
-        }
-
-        List<Action> actions = new ArrayList<>();
-        generateActions(board, color, state, actions);
-
-        if (actions.isEmpty()) return evalBoard(board, color);
-
-        PylosGameSimulator simulator = new PylosGameSimulator(state, color, board);
-        float bestScore = Float.NEGATIVE_INFINITY;
-
-        for (Action action : actions) {
-            action.simulate(simulator);
-            float score = -negamax(board, simulator.getColor(), simulator.getState(), depth - 1, -beta, -alpha);
-            action.reverseSimulate(simulator);
-
-            bestScore = Math.max(bestScore, score);
-            alpha = Math.max(alpha, score);
-            if (alpha >= beta) break;
-        }
-        return bestScore;
     }
 
     /**
      * Evaluates the board using the TensorFlow model.
-     * NEW INPUT SIZE: 38 features
+     * Contains the logic to flip the input perspective if the player is DARK.
      */
     private float evalBoard(PylosBoard board, PylosPlayerColor color) {
         long boardAsLong = board.toLong();
 
-        // Input Size: 38
-        // 0-29: Board Locations
-        // 30: My Reserve (normalized)
-        // 31: Enemy Reserve (normalized)
-        // 32: Reserve Difference
-        // 33: Material Difference
-        // 34-37: Layer Scores (Z0, Z1, Z2, Z3)
-        float[] inputs = new float[38];
+        // 1. Prepare the input array (60 inputs)
+        float[] boardAsArray = new float[60];
+        for (int i = 0; i < 60; i++) {
+            int leftShifts = 59 - i;
+            // In standard Pylos logic: 0 = Light, 1 = Dark (in the bitboard bits)
+            boolean isLightSphere = (boardAsLong & (1L << leftShifts)) == 0;
 
-        int lightCount = 0;
-        int darkCount = 0;
-
-        // --- 1. PARSE BOARD (Indices 0-29) ---
-        for (int loc = 0; loc < 30; loc++) {
-            int shift = loc * 2;
-            long val = (boardAsLong >> shift) & 3;
-
-            float inputVal = 0.0f;
-
-            if (val == 1) {
-                lightCount++;
-                inputVal = (color == PylosPlayerColor.LIGHT) ? 1.0f : -1.0f;
+            float val;
+            // --- PERSPECTIVE LOGIC ---
+            if (color == PylosPlayerColor.LIGHT) {
+                // If I am LIGHT, the model expects My Pieces = 0, Enemy = 1
+                val = isLightSphere ? 0.0f : 1.0f;
+            } else {
+                // If I am DARK, the model expects My Pieces = 0, Enemy = 1
+                // So we flip the inputs: Light spheres become "Enemy" (1.0)
+                val = isLightSphere ? 1.0f : 0.0f;
             }
-            else if (val == 2) {
-                darkCount++;
-                inputVal = (color == PylosPlayerColor.DARK) ? 1.0f : -1.0f;
-            }
-
-            inputs[loc] = inputVal;
+            boardAsArray[i] = val;
         }
 
-        // --- 2. CALCULATE RESERVES (Indices 30-33) ---
-        int lightReserves = 15 - lightCount;
-        int darkReserves = 15 - darkCount;
-
-        float myReserves, enemyReserves, reserveDiff, materialDiff;
-
-        if (color == PylosPlayerColor.LIGHT) {
-            myReserves = lightReserves / 15.0f;
-            enemyReserves = darkReserves / 15.0f;
-            reserveDiff = (lightReserves - darkReserves) / 15.0f;
-            materialDiff = (lightCount - darkCount) / 30.0f;
-        } else {
-            myReserves = darkReserves / 15.0f;
-            enemyReserves = lightReserves / 15.0f;
-            reserveDiff = (darkReserves - lightReserves) / 15.0f;
-            materialDiff = (darkCount - lightCount) / 30.0f;
-        }
-
-        inputs[30] = myReserves;
-        inputs[31] = enemyReserves;
-        inputs[32] = reserveDiff;
-        inputs[33] = materialDiff;
-
-        // --- 3. CALCULATE LAYER SCORES (Indices 34-37) ---
-        float sumZ0 = 0;
-        for(int i=0; i<=15; i++) sumZ0 += inputs[i];
-        inputs[34] = sumZ0 / 16.0f;
-
-        float sumZ1 = 0;
-        for(int i=16; i<=24; i++) sumZ1 += inputs[i];
-        inputs[35] = sumZ1 / 9.0f;
-
-        float sumZ2 = 0;
-        for(int i=25; i<=28; i++) sumZ2 += inputs[i];
-        inputs[36] = sumZ2 / 4.0f;
-
-        inputs[37] = inputs[29];
-
-        // --- 4. RUN INFERENCE ---
         float output = Float.NaN;
-        try (Tensor inputTensor = TFloat32.tensorOf(StdArrays.ndCopyOf(new float[][]{inputs}))) {
+        try (Tensor inputTensor = TFloat32.tensorOf(StdArrays.ndCopyOf(new float[][]{boardAsArray}))) {
             try (TFloat32 outputTensor = (TFloat32) model.session().runner()
                     .feed("serving_default_keras_tensor:0", inputTensor)
                     .fetch("StatefulPartitionedCall_1:0")
@@ -177,9 +114,15 @@ public class PylosPlayerML extends PylosPlayer {
                 output = outputTensor.getFloat();
             }
         }
+
+        // 2. Return output directly.
+        // The model is trained to return Higher Scores = Better for the "Input Player".
         return output;
     }
 
+    /**
+     * Helper: Generate all possible actions
+     */
     private static List<Action> generateActions(PylosBoard board, PylosPlayerColor color, PylosGameState state, List<Action> actionList) {
         actionList.clear();
         PylosSphere[] spheres = board.getSpheres(color);

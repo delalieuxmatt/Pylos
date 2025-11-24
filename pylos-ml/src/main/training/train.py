@@ -5,15 +5,26 @@ import numpy as np
 import datetime
 import os
 
-DATASET_PATH = "resources/games/all_battles.json"
-MODEL_EXPORT_PATH = "resources/models/"
-SELECTED_PLAYERS = []
-DISCOUNT_FACTOR = 0.98
-EPOCHS = 20
-BATCH_SIZE = 512
-N_CORES = 8
-LEARNING_RATE = 0.001
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    print(f"\n✅ SUCCESS: Found {len(gpus)} GPU(s).")
+    print(f"   Device details: {tf.config.experimental.get_device_details(gpus[0])['device_name']}")
+else:
+    print("\n❌ FAILURE: No GPU found. Still using CPU.")
 
+# --- OPTIMIZED CONFIGURATION FOR 160K GAMES ---
+DATASET_PATH = "src/main/training/resources/games/all_battles_1.json"
+MODEL_EXPORT_PATH = "src/main/training/resources/models/"
+SELECTED_PLAYERS = []
+
+# Training hyperparameters optimized for large dataset
+DISCOUNT_FACTOR = 0.99
+EPOCHS = 50              # More epochs since you have more data
+BATCH_SIZE = 2048        # Larger batches for stability with big dataset
+N_CORES = 8
+LEARNING_RATE = 0.0005   # Slightly lower LR for better convergence
+
+# Performance optimizations
 os.environ["OMP_NUM_THREADS"] = str(N_CORES)
 os.environ["TF_NUM_INTRAOP_THREADS"] = str(N_CORES)
 os.environ["TF_NUM_INTEROP_THREADS"] = str(N_CORES)
@@ -23,147 +34,253 @@ def main():
 
     model = build_model()
 
-    # Use learning rate schedule for better convergence
-    optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
-    model.compile(optimizer=optimizer, loss='mean_squared_error', metrics=['mae'])
+    # Count parameters
+    total_params = model.count_params()
+    print(f"Total model parameters: {total_params:,}")
 
-    boards, scores = build_dataset(DATASET_PATH)
+    # Optimizer with gradient clipping for stability
+    optimizer = tf.keras.optimizers.Adam(
+        learning_rate=LEARNING_RATE,
+        clipnorm=1.0  # Prevents exploding gradients
+    )
 
-    print(f"# datapoints: {len(boards)}")
-    print(f"Score range: [{scores.min():.2f}, {scores.max():.2f}]")
-    print(f"Score mean: {scores.mean():.2f}, std: {scores.std():.2f}")
+    model.compile(
+        optimizer=optimizer,
+        loss='mean_squared_error',
+        metrics=['mae', 'mse']
+    )
 
-    # Add early stopping and model checkpointing
+    # Build dataset
+    inputs, targets = build_dataset(DATASET_PATH)
+
+    print(f"\n=== DATASET STATISTICS ===")
+    print(f"Total datapoints: {len(inputs):,}")
+    print(f"Score range: [{targets.min():.4f}, {targets.max():.4f}]")
+    print(f"Score mean: {targets.mean():.4f}, std: {targets.std():.4f}")
+    print(f"Input shape: {inputs.shape}")
+
+    # Calculate validation set size
+    val_size = int(0.15 * len(inputs))  # 15% validation
+    print(f"Training samples: {len(inputs) - val_size:,}")
+    print(f"Validation samples: {val_size:,}")
+
+    # Advanced callbacks for large dataset training
+    # Advanced callbacks for large dataset training
     callbacks = [
+        # Early stopping with more patience for complex model
         tf.keras.callbacks.EarlyStopping(
             monitor='val_loss',
-            patience=5,
-            restore_best_weights=True
+            patience=10,
+            restore_best_weights=True,
+            verbose=1
         ),
+
+        # Reduce learning rate when plateauing
         tf.keras.callbacks.ReduceLROnPlateau(
             monitor='val_loss',
             factor=0.5,
-            patience=3,
-            min_lr=1e-6
+            patience=5,
+            min_lr=1e-7,
+            verbose=1
+        ),
+
+        # Save checkpoints during training - FIXED: Added .keras extension
+        tf.keras.callbacks.ModelCheckpoint(
+            filepath=MODEL_EXPORT_PATH + 'checkpoint_epoch{epoch:02d}_val{val_loss:.4f}.keras',
+            monitor='val_loss',
+            save_best_only=True,
+            verbose=1
+        ),
+
+        # Learning rate schedule with warmup
+        tf.keras.callbacks.LearningRateScheduler(
+            schedule=lambda epoch: LEARNING_RATE * min(1.0, (epoch + 1) / 5),
+            verbose=0
         )
     ]
 
+    print(f"\n=== STARTING TRAINING ===")
     history = model.fit(
-        boards, scores,
+        inputs, targets,
         epochs=EPOCHS,
         batch_size=BATCH_SIZE,
-        validation_split=0.2,
+        validation_split=0.15,  # 15% for validation
         callbacks=callbacks,
-        verbose=1
+        verbose=1,
+        shuffle=True
     )
 
-    # Save the model as SavedModel, with date and time as the name
+    # Save final model
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M")
     model.export(MODEL_EXPORT_PATH + timestamp)
     model.export(MODEL_EXPORT_PATH + "latest")
 
-    print(f"\nModel saved to {MODEL_EXPORT_PATH}")
-    print(f"Final validation loss: {history.history['val_loss'][-1]:.4f}")
+    # Print training summary
+    print(f"\n=== TRAINING COMPLETE ===")
+    print(f"Model saved to {MODEL_EXPORT_PATH}")
+    print(f"Best validation loss: {min(history.history['val_loss']):.6f}")
+    print(f"Best validation MAE: {min(history.history['val_mae']):.6f}")
+    print(f"Final validation loss: {history.history['val_loss'][-1]:.6f}")
+
+    # Check for overfitting
+    final_train_loss = history.history['loss'][-1]
+    final_val_loss = history.history['val_loss'][-1]
+    overfit_ratio = final_val_loss / final_train_loss
+    print(f"Overfit ratio (val/train): {overfit_ratio:.3f}")
+    if overfit_ratio > 1.2:
+        print("⚠️  Warning: Model may be overfitting. Consider:")
+        print("   - Increasing dropout")
+        print("   - Adding more regularization")
+        print("   - Reducing model size")
+    elif overfit_ratio < 1.05:
+        print("✓ Model is generalizing well!")
 
 def build_model():
     """
-    Improved model architecture with:
-    - Deeper network
-    - Batch normalization
-    - Dropout for regularization
+    Deep Residual Network for 160k games dataset
     """
-    inputs = layers.Input(shape=(60,), dtype=tf.float32)
+    inputs = layers.Input(shape=(38,), dtype=tf.float32)
 
-    # First block
-    x = layers.Dense(256, activation='relu')(inputs)
+    # Initial expansion
+    x = layers.Dense(512, kernel_initializer='he_normal')(inputs)
     x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.4)(x)
+
+    # Residual Block 1 (512 units)
+    residual = x
+    x = layers.Dense(512, kernel_initializer='he_normal')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.3)(x)
+    x = layers.Dense(512, kernel_initializer='he_normal')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Add()([x, residual])
+    x = layers.Activation('relu')(x)
     x = layers.Dropout(0.3)(x)
 
-    # Second block
-    x = layers.Dense(128, activation='relu')(x)
+    # Transition to 256
+    x = layers.Dense(256, kernel_initializer='he_normal')(x)
     x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
     x = layers.Dropout(0.3)(x)
 
-    # Third block
-    x = layers.Dense(64, activation='relu')(x)
+    # Residual Block 2 (256 units)
+    residual = x
+    x = layers.Dense(256, kernel_initializer='he_normal')(x)
     x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.3)(x)
+    x = layers.Dense(256, kernel_initializer='he_normal')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Add()([x, residual])
+    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.3)(x)
+
+    # Final layers
+    x = layers.Dense(128, kernel_initializer='he_normal')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
     x = layers.Dropout(0.2)(x)
 
-    # Fourth block
-    x = layers.Dense(32, activation='relu')(x)
+    x = layers.Dense(64, kernel_initializer='he_normal')(x)
     x = layers.BatchNormalization()(x)
+    x = layers.Activation('relu')(x)
 
-    # Output layer for regression (predict a single float value)
-    outputs = layers.Dense(1)(x)
-
-    model = models.Model(inputs=inputs, outputs=outputs)
-    return model
+    outputs = layers.Dense(1, activation='tanh')(x)
+    return models.Model(inputs=inputs, outputs=outputs)
 
 def build_dataset(path):
-    """
-    CRITICAL FIX: Generate training data from BOTH players' perspectives.
-
-    The key insight: In a two-player zero-sum game, we need to train the model
-    to evaluate positions from a consistent perspective. We do this by:
-    1. For each board position, create TWO training examples
-    2. One from Light's perspective (original board, positive if Light wins)
-    3. One from Dark's perspective (inverted board, positive if Dark wins)
-    """
     with open(path) as f:
         data = json.load(f)
 
-    print(f"Processing {len(data)} games")
+    print(f"Processing {len(data)} games...")
 
-    boards = []
-    scores = []
+    inputs_list = []
+    targets_list = []
 
-    for game_idx, game in enumerate(data):
-        # Skip games that don't have both players in the selected players list
+    for idx, game in enumerate(data):
+        if idx % 10000 == 0:
+            print(f"  Processed {idx}/{len(data)} games...")
+
         if SELECTED_PLAYERS and (
                 game["lightPlayer"] not in SELECTED_PLAYERS or
                 game["darkPlayer"] not in SELECTED_PLAYERS
         ):
             continue
 
-        winner = game["winner"]  # 1 for Light, -1 for Dark
-        n_moves = len(game["boardHistory"])
-        reserve_size = game['reserveSize']
-        sqComp = game['sqComp']
+        winner = game["winner"]
+        board_history = game["boardHistory"]
+        n_moves = len(board_history)
 
-        for i, board_as_long in enumerate(game["boardHistory"]):
-            # Convert board to array (0 = Light, 1 = Dark)
-            board_as_array = np.array(
-                [(board_as_long >> j) & 1 for j in range(59, -1, -1)],
-                dtype=np.float32
-            )
+        for i, board_long in enumerate(board_history):
+            raw_score = winner * (DISCOUNT_FACTOR ** (n_moves - i - 1))
 
-            # Calculate discount based on proximity to end of game
-            # Positions closer to the end are more certain
-            discount = DISCOUNT_FACTOR ** (n_moves - i - 1)
+            board_state = []
+            light_count = 0
+            dark_count = 0
 
-            # Light's perspective: positive if Light wins
-            light_score = winner * discount * (4*reserve_size + sqComp)
-            boards.append(board_as_array)
-            scores.append(light_score)
+            for loc in range(30):
+                shift = loc * 2
+                val = (board_long >> shift) & 3
 
-            # Dark's perspective: flip the board (0->1, 1->0) and score
-            # This teaches the model to evaluate from the active player's view
-            dark_board = 1.0 - board_as_array
-            dark_score = -winner * discount * (4*reserve_size + sqComp)  # Flip the score
-            boards.append(dark_board)
-            scores.append(dark_score)
+                if val == 1:
+                    board_state.append(1.0)
+                    light_count += 1
+                elif val == 2:
+                    board_state.append(-1.0)
+                    dark_count += 1
+                else:
+                    board_state.append(0.0)
 
-        if game_idx % 1000 == 0:
-            print(f"Processed game {game_idx}/{len(data)}")
+            board_arr = np.array(board_state, dtype=np.float32)
 
-    boards_array = np.array(boards, dtype=np.float32)
-    scores_array = np.array(scores, dtype=np.float32)
+            light_reserves = 15 - light_count
+            dark_reserves = 15 - dark_count
 
-    # Shuffle the dataset to mix Light and Dark perspectives
-    indices = np.random.permutation(len(boards_array))
+            light_reserves_norm = light_reserves / 15.0
+            dark_reserves_norm = dark_reserves / 15.0
+            reserve_diff = (light_reserves - dark_reserves) / 15.0
+            material_diff = (light_count - dark_count) / 30.0
 
-    return boards_array[indices], scores_array[indices]
+            z0_val = np.sum(board_arr[0:16]) / 16.0
+            z1_val = np.sum(board_arr[16:25]) / 9.0
+            z2_val = np.sum(board_arr[25:29]) / 4.0
+            z3_val = board_arr[29]
 
+            layer_features = np.array([z0_val, z1_val, z2_val, z3_val], dtype=np.float32)
+
+            # LIGHT PERSPECTIVE
+            light_input = np.concatenate([
+                board_arr,
+                [light_reserves_norm, dark_reserves_norm, reserve_diff, material_diff],
+                layer_features
+            ])
+            inputs_list.append(light_input)
+            targets_list.append(raw_score)
+
+            # DARK PERSPECTIVE
+            dark_board_arr = -board_arr
+            z0_dark = np.sum(dark_board_arr[0:16]) / 16.0
+            z1_dark = np.sum(dark_board_arr[16:25]) / 9.0
+            z2_dark = np.sum(dark_board_arr[25:29]) / 4.0
+            z3_dark = dark_board_arr[29]
+            dark_layer_features = np.array([z0_dark, z1_dark, z2_dark, z3_dark], dtype=np.float32)
+
+            dark_input = np.concatenate([
+                dark_board_arr,
+                [dark_reserves_norm, light_reserves_norm, -reserve_diff, -material_diff],
+                dark_layer_features
+            ])
+            inputs_list.append(dark_input)
+            targets_list.append(-raw_score)
+
+    inputs_array = np.array(inputs_list, dtype=np.float32)
+    targets_array = np.array(targets_list, dtype=np.float32)
+
+    # Shuffle
+    indices = np.random.permutation(len(inputs_array))
+    return inputs_array[indices], targets_array[indices]
 
 if __name__ == "__main__":
     main()
