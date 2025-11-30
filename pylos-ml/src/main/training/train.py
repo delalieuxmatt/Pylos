@@ -12,17 +12,16 @@ if gpus:
 else:
     print("\n❌ FAILURE: No GPU found. Still using CPU.")
 
-# --- OPTIMIZED CONFIGURATION FOR 160K GAMES ---
-DATASET_PATH = "src/main/training/resources/games/all_battles_1.json"
-MODEL_EXPORT_PATH = "src/main/training/resources/models/"
+DATASET_PATH = "resources/games/all_battles.json"
+MODEL_EXPORT_PATH = "resources/models/"
 SELECTED_PLAYERS = []
 
 # Training hyperparameters optimized for large dataset
 DISCOUNT_FACTOR = 0.99
-EPOCHS = 50              # More epochs since you have more data
-BATCH_SIZE = 2048        # Larger batches for stability with big dataset
+EPOCHS = 40
+BATCH_SIZE = 2048
 N_CORES = 8
-LEARNING_RATE = 0.0005   # Slightly lower LR for better convergence
+LEARNING_RATE = 0.0005
 
 # Performance optimizations
 os.environ["OMP_NUM_THREADS"] = str(N_CORES)
@@ -32,7 +31,7 @@ os.environ["TF_NUM_INTEROP_THREADS"] = str(N_CORES)
 def main():
     print("TensorFlow version:", tf.__version__)
 
-    model = build_model()
+    model = build_larger_model()
 
     # Count parameters
     total_params = model.count_params()
@@ -41,7 +40,7 @@ def main():
     # Optimizer with gradient clipping for stability
     optimizer = tf.keras.optimizers.Adam(
         learning_rate=LEARNING_RATE,
-        clipnorm=1.0  # Prevents exploding gradients
+        clipnorm=1.0
     )
 
     model.compile(
@@ -60,22 +59,17 @@ def main():
     print(f"Input shape: {inputs.shape}")
 
     # Calculate validation set size
-    val_size = int(0.15 * len(inputs))  # 15% validation
+    val_size = int(0.15 * len(inputs))
     print(f"Training samples: {len(inputs) - val_size:,}")
     print(f"Validation samples: {val_size:,}")
 
-    # Advanced callbacks for large dataset training
-    # Advanced callbacks for large dataset training
     callbacks = [
-        # Early stopping with more patience for complex model
         tf.keras.callbacks.EarlyStopping(
             monitor='val_loss',
             patience=10,
             restore_best_weights=True,
             verbose=1
         ),
-
-        # Reduce learning rate when plateauing
         tf.keras.callbacks.ReduceLROnPlateau(
             monitor='val_loss',
             factor=0.5,
@@ -83,16 +77,12 @@ def main():
             min_lr=1e-7,
             verbose=1
         ),
-
-        # Save checkpoints during training - FIXED: Added .keras extension
         tf.keras.callbacks.ModelCheckpoint(
             filepath=MODEL_EXPORT_PATH + 'checkpoint_epoch{epoch:02d}_val{val_loss:.4f}.keras',
             monitor='val_loss',
             save_best_only=True,
             verbose=1
         ),
-
-        # Learning rate schedule with warmup
         tf.keras.callbacks.LearningRateScheduler(
             schedule=lambda epoch: LEARNING_RATE * min(1.0, (epoch + 1) / 5),
             verbose=0
@@ -104,7 +94,7 @@ def main():
         inputs, targets,
         epochs=EPOCHS,
         batch_size=BATCH_SIZE,
-        validation_split=0.15,  # 15% for validation
+        validation_split=0.15,
         callbacks=callbacks,
         verbose=1,
         shuffle=True
@@ -135,60 +125,221 @@ def main():
     elif overfit_ratio < 1.05:
         print("✓ Model is generalizing well!")
 
-def build_model():
-    """
-    Deep Residual Network for 160k games dataset
-    """
-    inputs = layers.Input(shape=(37,), dtype=tf.float32)
+def build_larger_model():
+    inputs = layers.Input(shape=(31,), dtype=tf.float32)
 
-    # Initial expansion
-    x = layers.Dense(512, kernel_initializer='he_normal')(inputs)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation('relu')(x)
-    x = layers.Dropout(0.4)(x)
+    board_positions = layers.Lambda(lambda x: x[:, :30])(inputs)
+    reserve_diff = layers.Lambda(lambda x: x[:, 30:31])(inputs)
 
-    # Residual Block 1 (512 units)
-    residual = x
-    x = layers.Dense(512, kernel_initializer='he_normal')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation('relu')(x)
-    x = layers.Dropout(0.3)(x)
-    x = layers.Dense(512, kernel_initializer='he_normal')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Add()([x, residual])
-    x = layers.Activation('relu')(x)
-    x = layers.Dropout(0.3)(x)
+    board_sequence = layers.Reshape((30, 1))(board_positions)
 
-    # Transition to 256
-    x = layers.Dense(256, kernel_initializer='he_normal')(x)
+    # Much larger Conv1D
+    x = layers.Conv1D(256, kernel_size=5, activation='relu', padding='same')(board_sequence)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation('relu')(x)
-    x = layers.Dropout(0.3)(x)
-
-    # Residual Block 2 (256 units)
-    residual = x
-    x = layers.Dense(256, kernel_initializer='he_normal')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation('relu')(x)
-    x = layers.Dropout(0.3)(x)
-    x = layers.Dense(256, kernel_initializer='he_normal')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Add()([x, residual])
-    x = layers.Activation('relu')(x)
-    x = layers.Dropout(0.3)(x)
-
-    # Final layers
-    x = layers.Dense(128, kernel_initializer='he_normal')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Activation('relu')(x)
     x = layers.Dropout(0.2)(x)
 
-    x = layers.Dense(64, kernel_initializer='he_normal')(x)
+    x = layers.Conv1D(128, kernel_size=4, activation='relu', padding='same')(x)
     x = layers.BatchNormalization()(x)
-    x = layers.Activation('relu')(x)
+    x = layers.Dropout(0.2)(x)
+
+    x = layers.Conv1D(64, kernel_size=3, activation='relu', padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.2)(x)
+
+    x = layers.Conv1D(32, kernel_size=2, activation='relu', padding='same')(x)
+
+    conv_global = layers.GlobalAveragePooling1D()(x)
+    conv_max = layers.GlobalMaxPooling1D()(x)
+
+    square_features = compute_square_features(board_positions)
+
+    combined = layers.Concatenate()([conv_global, conv_max, square_features, reserve_diff])
+
+    # Much larger Dense layers
+    x = layers.Dense(1024, activation='relu', kernel_initializer='he_normal')(combined)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.4)(x)
+
+    x = layers.Dense(512, activation='relu', kernel_initializer='he_normal')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.3)(x)
+
+    x = layers.Dense(256, activation='relu', kernel_initializer='he_normal')(x)
+    x = layers.Dropout(0.2)(x)
 
     outputs = layers.Dense(1, activation='tanh')(x)
+
     return models.Model(inputs=inputs, outputs=outputs)
+
+def build_model():
+    """
+    Build a Conv1D-based model for Pylos that processes the pyramid structure.
+
+    Architecture:
+    - Conv1D over the 30 positions to detect vertical patterns (stacking, layer transitions)
+    - The network learns to map: 30 -> 16, 9, 4, 1 (the pyramid layers)
+    - Additional square detection for horizontal patterns
+    - Single global feature: reserve difference
+    """
+    # Input: 31 features (30 board positions + 1 reserve difference)
+    inputs = layers.Input(shape=(31,), dtype=tf.float32)
+
+    # Split input into board positions and global features
+    board_positions = layers.Lambda(lambda x: x[:, :30])(inputs)
+    reserve_diff = layers.Lambda(lambda x: x[:, 30:31])(inputs)
+
+    # Reshape board positions as a sequence for Conv1D
+    # Shape: (batch, 30, 1) - treating the 30 positions as a sequence
+    board_sequence = layers.Reshape((30, 1))(board_positions)
+
+    # First Conv1D: detect patterns across the full pyramid
+    # Kernel size 4 can detect layer transitions and stacking patterns
+    x = layers.Conv1D(64, kernel_size=4, activation='relu', padding='same')(board_sequence)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.2)(x)
+
+    # Second Conv1D: further pattern detection
+    x = layers.Conv1D(32, kernel_size=3, activation='relu', padding='same')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.2)(x)
+
+    # Pool to get layer-like representations
+    # This naturally learns to compress the pyramid structure
+    x = layers.Conv1D(16, kernel_size=2, activation='relu', padding='same')(x)
+
+    # Global pooling to get fixed-size representation
+    conv_global = layers.GlobalAveragePooling1D()(x)
+    conv_max = layers.GlobalMaxPooling1D()(x)
+
+    # Additional spatial features: detect 2x2 squares explicitly
+    # This captures horizontal patterns (squares on each layer)
+    square_features = compute_square_features(board_positions)
+
+    # Combine convolutional features with square features and reserve difference
+    combined = layers.Concatenate()([
+        conv_global,
+        conv_max,
+        square_features,
+        reserve_diff
+    ])
+
+    # Dense layers to process combined features
+    x = layers.Dense(256, activation='relu', kernel_initializer='he_normal')(combined)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.3)(x)
+
+    x = layers.Dense(128, activation='relu', kernel_initializer='he_normal')(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Dropout(0.3)(x)
+
+    x = layers.Dense(64, activation='relu', kernel_initializer='he_normal')(x)
+    x = layers.Dropout(0.2)(x)
+
+    outputs = layers.Dense(1, activation='tanh')(x)
+
+    return models.Model(inputs=inputs, outputs=outputs)
+
+def compute_square_features(board_positions):
+    """
+    Explicitly compute features for 2x2 squares in each layer.
+    This is a key mechanic in Pylos (forming squares allows removing balls).
+
+    Returns a feature vector indicating potential squares.
+    """
+    # Layer 0 (4x4): check all possible 2x2 squares
+    # There are 9 possible 2x2 squares in a 4x4 grid
+    layer0 = layers.Lambda(lambda x: tf.reshape(x[:, :16], [-1, 4, 4]))(board_positions)
+
+    # Extract 2x2 patches and sum them to detect complete squares
+    layer0_squares = []
+    for i in range(3):
+        for j in range(3):
+            # Extract 2x2 square at position (i, j)
+            square = layers.Lambda(
+                lambda x, i=i, j=j: x[:, i:i+2, j:j+2]
+            )(layer0)
+            square_sum = layers.Lambda(lambda x: tf.reduce_sum(tf.abs(x), axis=[1, 2]))(square)
+            layer0_squares.append(square_sum)
+
+    layer0_square_features = layers.Concatenate()(
+        [layers.Reshape((1,))(s) for s in layer0_squares]
+    )
+
+    # Layer 1 (3x3): check all possible 2x2 squares (4 squares)
+    layer1 = layers.Lambda(lambda x: tf.reshape(x[:, 16:25], [-1, 3, 3]))(board_positions)
+
+    layer1_squares = []
+    for i in range(2):
+        for j in range(2):
+            square = layers.Lambda(
+                lambda x, i=i, j=j: x[:, i:i+2, j:j+2]
+            )(layer1)
+            square_sum = layers.Lambda(lambda x: tf.reduce_sum(tf.abs(x), axis=[1, 2]))(square)
+            layer1_squares.append(square_sum)
+
+    layer1_square_features = layers.Concatenate()(
+        [layers.Reshape((1,))(s) for s in layer1_squares]
+    )
+
+    # Layer 2 (2x2): the entire layer is one square
+    layer2 = layers.Lambda(lambda x: x[:, 25:29])(board_positions)
+    layer2_square_sum = layers.Lambda(lambda x: tf.reduce_sum(tf.abs(x), axis=1, keepdims=True))(layer2)
+
+    # Combine all square features
+    all_square_features = layers.Concatenate()([
+        layer0_square_features,
+        layer1_square_features,
+        layer2_square_sum
+    ])
+
+    return all_square_features
+
+def apply_symmetry(board_state, symmetry_type):
+    """
+    Apply one of 8 symmetries to the board state.
+    symmetry_type: 0-7 (rot0, rot90, rot180, rot270, flip_h, flip_v, flip_d1, flip_d2)
+    """
+    result = np.zeros(30, dtype=np.float32)
+
+    # Layer 0: 4x4 grid
+    layer0 = board_state[0:16].reshape(4, 4)
+    layer0_transformed = transform_grid(layer0, symmetry_type)
+    result[0:16] = layer0_transformed.flatten()
+
+    # Layer 1: 3x3 grid
+    layer1 = board_state[16:25].reshape(3, 3)
+    layer1_transformed = transform_grid(layer1, symmetry_type)
+    result[16:25] = layer1_transformed.flatten()
+
+    # Layer 2: 2x2 grid
+    layer2 = board_state[25:29].reshape(2, 2)
+    layer2_transformed = transform_grid(layer2, symmetry_type)
+    result[25:29] = layer2_transformed.flatten()
+
+    # Layer 3: single position (no transformation needed)
+    result[29] = board_state[29]
+
+    return result
+
+def transform_grid(grid, symmetry_type):
+    """Apply symmetry transformation to a 2D grid."""
+    if symmetry_type == 0:
+        return grid
+    elif symmetry_type == 1:
+        return np.rot90(grid, k=1)
+    elif symmetry_type == 2:
+        return np.rot90(grid, k=2)
+    elif symmetry_type == 3:
+        return np.rot90(grid, k=3)
+    elif symmetry_type == 4:
+        return np.fliplr(grid)
+    elif symmetry_type == 5:
+        return np.flipud(grid)
+    elif symmetry_type == 6:
+        return np.transpose(grid)
+    elif symmetry_type == 7:
+        return np.fliplr(np.transpose(grid))
+    return grid
 
 def build_dataset(path):
     with open(path) as f:
@@ -199,8 +350,11 @@ def build_dataset(path):
     inputs_list = []
     targets_list = []
 
+    USE_SYMMETRY = True
+    NUM_SYMMETRIES = 4 if USE_SYMMETRY else 1
+
     for idx, game in enumerate(data):
-        if idx % 10000 == 0:
+        if idx % 1000 == 0:
             print(f"  Processed {idx}/{len(data)} games...")
 
         if SELECTED_PLAYERS and (
@@ -237,45 +391,35 @@ def build_dataset(path):
 
             light_reserves = 15 - light_count
             dark_reserves = 15 - dark_count
+            reserve_diff = (light_reserves - dark_reserves) / 30.0
 
-            light_reserves_norm = light_reserves / 15.0
-            dark_reserves_norm = dark_reserves / 15.0
-            reserve_diff = (light_reserves - dark_reserves) / 15.0
+            # Apply all symmetries
+            for sym in range(NUM_SYMMETRIES):
+                board_sym = apply_symmetry(board_arr, sym)
 
-            z0_val = np.sum(board_arr[0:16]) / 16.0
-            z1_val = np.sum(board_arr[16:25]) / 9.0
-            z2_val = np.sum(board_arr[25:29]) / 4.0
-            z3_val = board_arr[29]
+                # LIGHT PERSPECTIVE
+                light_input = np.concatenate([
+                    board_sym,
+                    [reserve_diff]
+                ])
+                inputs_list.append(light_input)
+                targets_list.append(raw_score)
 
-            layer_features = np.array([z0_val, z1_val, z2_val, z3_val], dtype=np.float32)
-
-            # LIGHT PERSPECTIVE
-            light_input = np.concatenate([
-                board_arr,
-                [light_reserves_norm, dark_reserves_norm, reserve_diff],
-                layer_features
-            ])
-            inputs_list.append(light_input)
-            targets_list.append(raw_score)
-
-            # DARK PERSPECTIVE
-            dark_board_arr = -board_arr
-            z0_dark = np.sum(dark_board_arr[0:16]) / 16.0
-            z1_dark = np.sum(dark_board_arr[16:25]) / 9.0
-            z2_dark = np.sum(dark_board_arr[25:29]) / 4.0
-            z3_dark = dark_board_arr[29]
-            dark_layer_features = np.array([z0_dark, z1_dark, z2_dark, z3_dark], dtype=np.float32)
-
-            dark_input = np.concatenate([
-                dark_board_arr,
-                [dark_reserves_norm, light_reserves_norm, -reserve_diff],
-                dark_layer_features
-            ])
-            inputs_list.append(dark_input)
-            targets_list.append(-raw_score)
+                # DARK PERSPECTIVE
+                dark_board_sym = -board_sym
+                dark_input = np.concatenate([
+                    dark_board_sym,
+                    [-reserve_diff]
+                ])
+                inputs_list.append(dark_input)
+                targets_list.append(-raw_score)
 
     inputs_array = np.array(inputs_list, dtype=np.float32)
     targets_array = np.array(targets_list, dtype=np.float32)
+
+    print(f"\n=== SYMMETRY AUGMENTATION ===")
+    print(f"Symmetries applied: {NUM_SYMMETRIES}")
+    print(f"Effective dataset size: {len(inputs_array):,} examples")
 
     # Shuffle
     indices = np.random.permutation(len(inputs_array))
