@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PylosPlayerML2 extends PylosPlayer {
-
     private final SavedModelBundle model;
 
     public PylosPlayerML2(SavedModelBundle model) {
@@ -20,93 +19,89 @@ public class PylosPlayerML2 extends PylosPlayer {
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
-        // Just find the best immediate move according to the Neural Net
-        Action bestAction = findBestAction(board, this.PLAYER_COLOR, PylosGameState.MOVE);
+        Action bestAction = bestAction(board, this.PLAYER_COLOR, PylosGameState.MOVE);
         bestAction.execute(game);
     }
 
     @Override
     public void doRemove(PylosGameIF game, PylosBoard board) {
-        Action bestAction = findBestAction(board, this.PLAYER_COLOR, PylosGameState.REMOVE_FIRST);
+        Action bestAction = bestAction(board, this.PLAYER_COLOR, PylosGameState.REMOVE_FIRST);
         bestAction.execute(game);
     }
 
     @Override
     public void doRemoveOrPass(PylosGameIF game, PylosBoard board) {
-        Action bestAction = findBestAction(board, this.PLAYER_COLOR, PylosGameState.REMOVE_SECOND);
+        Action bestAction = bestAction(board, this.PLAYER_COLOR, PylosGameState.REMOVE_SECOND);
         bestAction.execute(game);
     }
 
-    /**
-     * PURE ML SEARCH STRATEGY:
-     * 1. Generate all legal moves.
-     * 2. Simulate each move to see the resulting board.
-     * 3. Ask the Neural Network: "How good is this board for ME?"
-     * 4. Pick the move with the highest score.
-     */
-    private Action findBestAction(PylosBoard board, PylosPlayerColor color, PylosGameState state) {
-        List<Action> actionList = new ArrayList<>();
-        List<Action> actions = generateActions(board, color, state, actionList);
+    // First iteration of minimax function which returns an action instead of a score
+    private Action bestAction(PylosBoard board, PylosPlayerColor color, PylosGameState state) {
+        List<Action> actions = generateActions(board, color, state);
         PylosGameSimulator simulator = new PylosGameSimulator(state, color, board);
 
         Action bestAction = null;
         float bestEval = Float.NEGATIVE_INFINITY;
-
         for (Action action : actions) {
-            // 1. Simulate the move
             action.simulate(simulator);
-
-            // 2. Evaluate the board AFTER the move.
-            // We ask: "What is the value of this board for ME (this.PLAYER_COLOR)?"
-            float eval = evalBoard(board, this.PLAYER_COLOR);
-
-            // 3. Undo the simulation
+            float eval = evalBoard(board, color);
             action.reverseSimulate(simulator);
-
-            // 4. Maximize the score
             if (eval > bestEval) {
                 bestEval = eval;
                 bestAction = action;
             }
         }
 
-        // Fallback if list is empty or errors occur
-        if (bestAction == null && !actions.isEmpty()) {
-            return actions.get(0);
-        }
-
         return bestAction;
     }
 
-    /**
-     * Evaluates the board using the TensorFlow model.
-     * Contains the logic to flip the input perspective if the player is DARK.
-     */
+    // Returns a value which we try to maximise and our opponent tries to minimize.
     private float evalBoard(PylosBoard board, PylosPlayerColor color) {
         long boardAsLong = board.toLong();
 
-        // 1. Prepare the input array (60 inputs)
-        float[] boardAsArray = new float[60];
-        for (int i = 0; i < 60; i++) {
-            int leftShifts = 59 - i;
-            // In standard Pylos logic: 0 = Light, 1 = Dark (in the bitboard bits)
-            boolean isLightSphere = (boardAsLong & (1L << leftShifts)) == 0;
+        // Input Size: 31
+        // 0-29: Board Positions
+        // 30: Reserve Difference (normalized)
+        float[] inputs = new float[31];
 
-            float val;
-            // --- PERSPECTIVE LOGIC ---
-            if (color == PylosPlayerColor.LIGHT) {
-                // If I am LIGHT, the model expects My Pieces = 0, Enemy = 1
-                val = isLightSphere ? 0.0f : 1.0f;
-            } else {
-                // If I am DARK, the model expects My Pieces = 0, Enemy = 1
-                // So we flip the inputs: Light spheres become "Enemy" (1.0)
-                val = isLightSphere ? 1.0f : 0.0f;
+        int lightCount = 0;
+        int darkCount = 0;
+
+        // --- 1. PARSE BOARD (Indices 0-29) ---
+        for (int loc = 0; loc < 30; loc++) {
+            int shift = loc * 2;
+            long val = (boardAsLong >> shift) & 3;
+
+            float inputVal = 0.0f;
+
+            if (val == 1) {
+                lightCount++;
+                inputVal = (color == PylosPlayerColor.LIGHT) ? 1.0f : -1.0f;
             }
-            boardAsArray[i] = val;
+            else if (val == 2) {
+                darkCount++;
+                inputVal = (color == PylosPlayerColor.DARK) ? 1.0f : -1.0f;
+            }
+
+            inputs[loc] = inputVal;
         }
 
+        // --- 2. CALCULATE RESERVE DIFFERENCE (Index 30) ---
+        int lightReserves = 15 - lightCount;
+        int darkReserves = 15 - darkCount;
+
+        float reserveDiff;
+        if (color == PylosPlayerColor.LIGHT) {
+            reserveDiff = (lightReserves - darkReserves) / 30.0f;
+        } else {
+            reserveDiff = (darkReserves - lightReserves) / 30.0f;
+        }
+
+        inputs[30] = reserveDiff;
+
+        // --- 3. RUN INFERENCE ---
         float output = Float.NaN;
-        try (Tensor inputTensor = TFloat32.tensorOf(StdArrays.ndCopyOf(new float[][]{boardAsArray}))) {
+        try (Tensor inputTensor = TFloat32.tensorOf(StdArrays.ndCopyOf(new float[][]{inputs}))) {
             try (TFloat32 outputTensor = (TFloat32) model.session().runner()
                     .feed("serving_default_keras_tensor:0", inputTensor)
                     .fetch("StatefulPartitionedCall_1:0")
@@ -114,17 +109,11 @@ public class PylosPlayerML2 extends PylosPlayer {
                 output = outputTensor.getFloat();
             }
         }
-
-        // 2. Return output directly.
-        // The model is trained to return Higher Scores = Better for the "Input Player".
         return output;
     }
 
-    /**
-     * Helper: Generate all possible actions
-     */
-    private static List<Action> generateActions(PylosBoard board, PylosPlayerColor color, PylosGameState state, List<Action> actionList) {
-        actionList.clear();
+    private static List<Action> generateActions(PylosBoard board, PylosPlayerColor color, PylosGameState state) {
+        List<Action> actions = new ArrayList<>();
         PylosSphere[] spheres = board.getSpheres(color);
 
         switch (state) {
@@ -133,6 +122,7 @@ public class PylosPlayerML2 extends PylosPlayer {
                 PylosSquare[] squares = board.getAllSquares();
                 List<PylosLocation> availableFullSquaresTopLocations = new ArrayList<>();
 
+                // Add actions for moving a sphere to a higher location
                 for (PylosSquare square : squares)
                     if (square.getTopLocation().isUsable())
                         availableFullSquaresTopLocations.add(square.getTopLocation());
@@ -141,33 +131,43 @@ public class PylosPlayerML2 extends PylosPlayer {
                     if (!sphere.isReserve())
                         for (PylosLocation location : availableFullSquaresTopLocations)
                             if (sphere.canMoveTo(location) && sphere.getLocation() != location)
-                                actionList.add(new Action(ActionType.MOVE, sphere, location));
+                                actions.add(new Action(ActionType.MOVE, sphere, location));
 
+                // Add actions for moving a reserve sphere to a free location
                 for (PylosLocation location : locations)
                     if (location.isUsable())
-                        actionList.add(new Action(ActionType.ADD, board.getReserve(color), location));
+                        actions.add(new Action(ActionType.ADD, board.getReserve(color), location));
             }
             case REMOVE_FIRST -> {
                 for (PylosSphere sphere : spheres)
                     if (sphere.canRemove())
-                        actionList.add(new Action(ActionType.REMOVE_FIRST, sphere, null));
+                        actions.add(new Action(ActionType.REMOVE_FIRST, sphere, null));
             }
             case REMOVE_SECOND -> {
-                actionList.add(new Action(ActionType.PASS, null, null));
+                actions.add(new Action(ActionType.PASS, null, null));
                 for (PylosSphere sphere : spheres)
                     if (sphere.canRemove())
-                        actionList.add(new Action(ActionType.REMOVE_SECOND, sphere, null));
+                        actions.add(new Action(ActionType.REMOVE_SECOND, sphere, null));
             }
         }
-        return actionList;
+
+        return actions;
     }
 
-    enum ActionType { ADD, MOVE, REMOVE_FIRST, REMOVE_SECOND, PASS }
+
+    enum ActionType {
+        ADD,
+        MOVE,
+        REMOVE_FIRST,
+        REMOVE_SECOND,
+        PASS
+    }
 
     private static class Action {
         private final ActionType type;
         private final PylosSphere sphere;
         private final PylosLocation location;
+
         private PylosLocation prevLocation;
         private PylosGameState prevState;
         private PylosPlayerColor prevColor;
@@ -180,33 +180,54 @@ public class PylosPlayerML2 extends PylosPlayer {
 
         public void execute(PylosGameIF game) {
             switch (type) {
-                case ADD, MOVE -> game.moveSphere(sphere, location);
-                case REMOVE_FIRST, REMOVE_SECOND -> game.removeSphere(sphere);
-                case PASS -> game.pass();
+                case ADD, MOVE ->
+                        game.moveSphere(sphere, location);
+                case REMOVE_FIRST, REMOVE_SECOND ->
+                        game.removeSphere(sphere);
+                case PASS ->
+                        game.pass();
+                default ->
+                        throw new IllegalStateException("type not found in switch");
             }
         }
 
         public void simulate(PylosGameSimulator simulator) {
             prevState = simulator.getState();
             prevColor = simulator.getColor();
+
             if (type == ActionType.MOVE || type == ActionType.REMOVE_FIRST || type == ActionType.REMOVE_SECOND) {
+                // Save the previous location of the sphere
                 prevLocation = sphere.getLocation();
+                assert prevLocation != null : "prevLocation is null";
             }
             switch (type) {
-                case ADD, MOVE -> simulator.moveSphere(sphere, location);
-                case REMOVE_FIRST, REMOVE_SECOND -> simulator.removeSphere(sphere);
-                case PASS -> simulator.pass();
+                case ADD, MOVE ->
+                        simulator.moveSphere(sphere, location);
+                case REMOVE_FIRST, REMOVE_SECOND ->
+                        simulator.removeSphere(sphere);
+                case PASS ->
+                        simulator.pass();
+                default ->
+                        throw new IllegalStateException("type not found in switch");
             }
         }
 
         public void reverseSimulate(PylosGameSimulator simulator) {
             switch (type) {
-                case ADD -> simulator.undoAddSphere(sphere, prevState, prevColor);
-                case MOVE -> simulator.undoMoveSphere(sphere, prevLocation, prevState, prevColor);
-                case REMOVE_FIRST -> simulator.undoRemoveFirstSphere(sphere, prevLocation, prevState, prevColor);
-                case REMOVE_SECOND -> simulator.undoRemoveSecondSphere(sphere, prevLocation, prevState, prevColor);
-                case PASS -> simulator.undoPass(prevState, prevColor);
+                case ADD ->
+                        simulator.undoAddSphere(sphere, prevState, prevColor);
+                case MOVE ->
+                        simulator.undoMoveSphere(sphere, prevLocation, prevState, prevColor);
+                case REMOVE_FIRST ->
+                        simulator.undoRemoveFirstSphere(sphere, prevLocation, prevState, prevColor);
+                case REMOVE_SECOND ->
+                        simulator.undoRemoveSecondSphere(sphere, prevLocation, prevState, prevColor);
+                case PASS ->
+                        simulator.undoPass(prevState, prevColor);
+                default ->
+                        throw new IllegalStateException("type not found in switch");
             }
         }
     }
 }
+
